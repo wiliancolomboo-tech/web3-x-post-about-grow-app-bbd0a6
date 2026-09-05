@@ -1,0 +1,60 @@
+flowchart TD
+    subgraph UserSpace["User / Client Layer"]
+        U["End User Wallet"]
+        K["Keeper Crank / Off-Chain Bot"]
+    end
+
+    subgraph GrowProgram["Grow App Smart Contract (Program ID: GrowVa1111111111111111111111111111111111111)"]
+        direction TB
+        subgraph Accounts["Account Structures (Zero-Copy / PDAs)"]
+            VS["VaultState PDA<br/>seeds=[b'vault', base_mint]"]
+            VA["Vault Authority PDA<br/>seeds=[b'authority', vault_state]"]
+            TK["Vault Token Account (Idle Reserves)<br/>Owner: Vault Authority PDA"]
+            SHM["Share Mint (Grow LP Token)<br/>Mint Authority: Vault Authority PDA"]
+            STRAT["Strategy Registry PDA<br/>seeds=[b'strategy', vault_state, strategy_id]"]
+        end
+
+        subgraph Logic["Instruction Logic & Security Guards"]
+        DEP["deposit()<br/>• CU Check<br/>• Math Check: u128 shares<br/>• Mint Shares CPI"]
+        WITH["withdraw()<br/>• Slippage Verification<br/>• Burn Shares CPI<br/>• Token Transfer CPI"]
+        REB["rebalance()<br/>• Keeper Auth / Fee Incentive<br/>• Allocation Cap Enforcement<br/>• Flash Loan / TWAP Check"]
+        HARV["harvest_yield()<br/>• Auto-compound into idle reserves"]
+        end
+    end
+
+    subgraph ExternalDeFi["Solana DeFi Protocols (CPI Endpoints)"]
+        KAM["Kamino Finance / K-Vaults"]
+        MARG["Marginfi Lending Pool"]
+        DRIFT["Drift Spot Market"]
+        ORACLE["Pyth / Switchboard TWAP Oracles"]
+    end
+
+    %% User Interactions
+    U -->|"1. Deposit Base Asset (USDC/SOL)"| DEP
+    DEP -->|"Transfer Base Token"| TK
+    DEP -->|"Mint Grow Share Tokens"| SHM
+    U -->|"Burn Grow Shares"| WITH
+    WITH -->|"Transfer Base + Yield"| U
+
+    %% Keeper Interactions
+    K -->|"Triggers Rebalance via Jito"| REB
+    K -->|"Claims Crank Bounty"| HARV
+
+    %% Program Flow & Guardrails
+    REB -->|"Read Prices & Health"| ORACLE
+    DEP -.->|"Guarded by"| VS
+    WITH -.->|"Guarded by"| VS
+    REB -.->|"Validates Limits"| STRAT
+
+    %% CPIs to External Protocols via Vault Authority PDA
+    VA ==>|"CPI: Deposit/Borrow Liquidity"| KAM
+    VA ==>|"CPI: Margin Supply"| MARG
+    VA ==>|"CPI: Deposit Collateral"| DRIFT
+
+    %% Security Annotations
+    classDef security fill:#ffefef,stroke:#ff0000,stroke-width:2px;
+    classDef pda fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef external fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+    
+    class VS,VA,TK,SHM,STRAT pda;
+    class KAM,MARG,DRIFT,ORACLE external;
