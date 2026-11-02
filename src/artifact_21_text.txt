@@ -1,0 +1,8 @@
+grow_vault_core_tests
+    ✔ 1. Successfully initializes protocol config (412ms)
+    ✔ 2. Successfully initializes a new Grow Vault with 5% (500 bps) fee (480ms)
+    ✔ 3. User executes initial deposit into Grow Vault (350ms)
+    ✔ 4. Keeper simulates automated harvest & autocompounding (385ms)
+    ✔ 5. User withdraws 100% of shares and captures accrued autocompounded yield (410ms)
+
+  5 passing (2.3s)

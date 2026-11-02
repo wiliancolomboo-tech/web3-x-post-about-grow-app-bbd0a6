@@ -1,0 +1,43 @@
+flowchart TD
+    subgraph Client_And_Social["1. Creator & Social Execution Layer"]
+        A[Creator publishes X Post about Grow App] -->|Captures Tweet ID, Author Handle & Metrics| B[Off-Chain Indexer / Keeper Daemon]
+        B -->|Validates rules: #Solana, @GrowApp, reach criteria| C[Sign Post Payload with Verification Keypair]
+    end
+
+    subgraph Solana_Runtime_Validation["2. Solana On-Chain Verification Runtime"]
+        C -->|Submit Instruction: claim_bounty| D[Solana Bank / Instruction Processor]
+        
+        subgraph Program_Instructions["grow_engine Program Instructions"]
+            D --> E[Instruction 1: Ed25519 Program Pre-compile Check]
+            D --> F[Instruction 2: grow_engine::claim_post_bounty]
+            
+            F --> G{Security Guard Checks}
+            G -->|Check 1| G1[Signer Validation: Creator == claimer_authority]
+            G -->|Check 2| G2[PDA Seed Derivation: nullifier == HASH tweet_id]
+            G -->|Check 3| G3[Reentrancy Guard: Nullifier State Uninitialized]
+            
+            G1 & G2 & G3 -->|All Passes| H[Write Nullifier State: marked as CLAIMED]
+            G1 & G2 & G3 -->|Fails| ERR[Revert: AlreadyClaimed or InvalidProof]
+        end
+    end
+
+    subgraph Token_Vault_Execution["3. State Settlement & SPL Escrow"]
+        H --> I[Derive Escrow PDA Signer: seeds = ['escrow_vault', bounty_pool]]
+        I --> J[Invoke CPI: anchor_spl::token::transfer]
+        J --> K[(Program Escrow SPL Token Account)]
+        K -->|Transfers Reward Tokens| L[(Creator Associated Token Account - ATA)]
+    end
+
+    subgraph Telemetry["4. Event Telemetry & Indexing"]
+        J --> M[Emit BountyClaimedEvent: tweet_id, creator, amount, timestamp]
+        M --> N[Solana Geyser Plugin / Real-time Explorer]
+    end
+
+    style A fill:#24292e,stroke:#fff,stroke-width:1px,color:#fff
+    style C fill:#0052FF,stroke:#fff,stroke-width:1px,color:#fff
+    style F fill:#14F195,stroke:#000,stroke-width:2px,color:#000
+    style G fill:#9945FF,stroke:#fff,stroke-width:2px,color:#fff
+    style H fill:#14F195,stroke:#000,stroke-width:1px,color:#000
+    style K fill:#FF5555,stroke:#fff,stroke-width:2px,color:#fff
+    style L fill:#14F195,stroke:#000,stroke-width:2px,color:#000
+    style ERR fill:#FF0000,stroke:#fff,stroke-width:2px,color:#fff

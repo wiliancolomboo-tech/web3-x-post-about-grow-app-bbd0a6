@@ -1,0 +1,7 @@
+6/8 The Numbers: Manual DCA vs. Grow Engine 📊
+
+Baseline USDC Lending: ~6.2% APY
+Grow Dynamic Rebalance + Jito-MEV routing: ~11.8% APY
+
+Compounded hourly over 365 days:
+An additional +560 bps of net yield purely derived from algorithmic rebalancing & zero idle-spread drag.

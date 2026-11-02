@@ -1,0 +1,6 @@
+SOLANA_RPC_URL="http://127.0.0.1:8899"
+GROW_PROGRAM_ID="GroW111111111111111111111111111111111111111"
+X_API_KEY="your_api_key"
+X_API_SECRET_KEY="your_api_secret"
+X_ACCESS_TOKEN="your_access_token"
+X_ACCESS_TOKEN_SECRET="your_access_token_secret"

@@ -1,0 +1,60 @@
+🧵 1/7
+Why is @GrowApp the killer savings layer on @Solana? 
+
+While traditional CeFi gives you 0.05% and manual DeFi costs you endless clicks, Grow automates multi-protocol yield routing natively on-chain.
+
+Here is the deep-dive technical architecture behind Grow 👇⚡
+
+---
+
+2/7
+DeFi yield on Solana is fractured across Kamino, Marginfi, and liquidity pools. 
+Retail users face two huge problems:
+1. Slippage & manual transaction fatigue
+2. Yield decay when pools fluctuate
+
+Grow solves this with Non-Custodial Algorithmic Vaults ($gTokens). 
+Let’s look at the math 📐
+
+---
+
+3/7
+When you deposit USDC into Grow, you receive $gUSD (yield-bearing LP tokens).
+Your shares are governed by a strict virtual pricing invariant:
+
+Shares = (Deposit Amount * Total Shares) / Total Assets
+
+Zero inflation attack vulnerabilities. Zero floating-point rounding errors. 🛡️
+
+---
+
+4/7
+Under the hood, Grow runs an ultra-lean Anchor smart contract:
+⚡ Under 30,000 Compute Units (CU) per deposit/withdrawal!
+🔒 PDA-bounded token vaults: No admin can rug funds.
+🔥 Automatic burn-before-transfer reentrancy guards.
+
+---
+
+5/7
+How does the yield auto-compound? 🤖
+Grow’s automated keeper network monitors dynamic borrowing rates 24/7.
+The moment yield is realized, it’s harvested and rebalanced in single-slot atomic CPI transactions.
+Every block is working for your portfolio while you sleep.
+
+---
+
+6/7
+Check out the full visual architecture below!
+From client wallet -> PDA Vault -> CPI Routing -> Yield Compounding:
+Everything is transparent, audited, and deterministic on Solana. 
+
+[Attached Mermaid Architecture Diagram]
+
+---
+
+7/7
+Grow App bridges high-frequency Solana speed with effortless personal finance. 
+Self-custodial wealth creation is no longer an aspiration—it’s live on Solana.
+
+Built for the future of decentralized capital. 🌱🚀

@@ -1,0 +1,21 @@
++----------------------------------------------------------------------------------------------------+
+|                                    GROW APP SECURITY INVARIANTS                                    |
++------------------------------+----------------------------------+----------------------------------+
+| ATTACK VECTOR / THREAT       | PROTOCOL DEFENSE MECHANISM       | ANCHOR / SOLANA IMPLEMENTATION   |
++------------------------------+----------------------------------+----------------------------------+
+| Reentrancy & Cross-Invocation| Execution within single slot;    | Single-entrypoint state mutate;  |
+| State Corruption             | checks-effects-interactions      | Rust ownership model prevents    |
+|                              | strictly enforced.               | unsafe reference sharing.        |
++------------------------------+----------------------------------+----------------------------------+
+| PDA Seed Collision / Spoofing| Explicit PDA seed derivation     | seeds = [b"user_vault",          |
+|                              | binding user pubkey + mint key.  | user.key(), mint.key()], bump.   |
++------------------------------+----------------------------------+----------------------------------+
+| Arbitrary Treasury Siphoning | Canonical Treasury constraint    | constraint = treasury_account    |
+|                              | on harvest execution.            | .owner == global_config.treasury |
++------------------------------+----------------------------------+----------------------------------+
+| Oracle & Price Stale Arbitrage| Max 50 bps deviation circuit     | Clock slot freshness checks +    |
+|                              | breaker on automated rebalance.  | absolute threshold delta guards. |
++------------------------------+----------------------------------+----------------------------------+
+| Token-2022 Transfer Fee Skim | Checked transfers passing mint   | token_interface::TransferChecked |
+|                              | decimals explicitly.             | with exact mint verification.    |
++------------------------------+----------------------------------+----------------------------------+

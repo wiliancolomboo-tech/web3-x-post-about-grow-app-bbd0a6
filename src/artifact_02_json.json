@@ -1,0 +1,5 @@
+> {
+>   "label": "Deposit to Grow Vault",
+>   "href": "/api/actions/grow?vault=SOL-USDC&amount={amount}"
+> }
+>

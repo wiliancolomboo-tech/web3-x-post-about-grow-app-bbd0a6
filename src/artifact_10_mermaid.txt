@@ -1,0 +1,63 @@
+flowchart TD
+    subgraph Client_Layer ["Client & Interface Layer"]
+        UA["Mobile User / Web App / Solana Blink"]
+        KB["Automated Keeper Bot (Jito Bundle)"]
+        ADMIN["Protocol Multisig Authority"]
+    end
+
+    subgraph Program_Layer ["Grow Anchor Program: grow_vault"]
+        direction TB
+        INIT["initialize_vault()"]
+        DEP["deposit(amount)"]
+        WITH["withdraw(shares)"]
+        HARV["harvest_and_compound()"]
+        EMERG["toggle_emergency_pause()"]
+    end
+
+    subgraph State_Layer ["On-Chain Accounts (PDAs)"]
+        VS[("Vault State PDA\nseeds=[b'vault', mint]")]
+        VT[("Vault Token Reserve PDA\nseeds=[b'vault_token', vault]")]
+        SM[("Share Mint PDA\nseeds=[b'shares', vault]")]
+        US[("User Share Account\nOwner: User")]
+    end
+
+    subgraph Security_Guards ["Security & Assertion Subsystem"]
+        SG1{"Paused == false?"}
+        SG2{"Delta Balance Verification"}
+        SG3{"Virtual Dead Shares > 0"}
+        SG4{"Signer == Authority?"}
+    end
+
+    subgraph External_Protocols ["Solana Yield Integrations (CPI Targets)"]
+        KAMINO["Kamino Lending Market"]
+        JUPITER["Jupiter Aggregator V6"]
+        JITO["Jito MEV Stake Pool"]
+    end
+
+    %% Flow connections
+    UA -->|"Deposit Tokens"| DEP
+    UA -->|"Burn Shares / Redeem"| WITH
+    KB -->|"Trigger Compound Loop"| HARV
+    ADMIN -->|"Emergency Stop"| EMERG
+
+    DEP --> SG1
+    SG1 -->|"Valid"| VS
+    DEP -->|"Transfer Base Asset"| VT
+    DEP -->|"Mint Vault Shares"| SM
+    SM -->|"Credit Shares"| US
+
+    WITH --> SG1
+    WITH -->|"Verify Burn"| US
+    WITH -->|"Burn Shares"| SM
+    WITH -->|"Release Pro-Rata Base"| VT
+    VT -->|"Transfer Base"| UA
+
+    HARV --> SG1
+    HARV -->|"Read Strategy Yield"| KAMINO
+    HARV -->|"Execute Swap Rewards"| JUPITER
+    JUPITER -->|"Swap to Base Asset"| VT
+    HARV --> SG2
+    SG2 -->|"Balance Scaled"| VS
+
+    ADMIN --> SG4
+    SG4 -->|"Toggle Paused"| VS

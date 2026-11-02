@@ -1,0 +1,8 @@
+grow-vault E2E QA Verification Suite
+    ✔ 1. Initializes global protocol configuration (418ms)
+    ✔ 2. Initializes non-custodial user vault (382ms)
+    ✔ 3. Executes verified deposit & share issuance (412ms)
+    ✔ 4. Prevents compounding before cooldown passes (68ms)
+    ✔ 5. Completes partial withdrawal with accurate share calculation (395ms)
+
+  5 passing (2s)

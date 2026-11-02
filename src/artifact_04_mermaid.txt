@@ -1,0 +1,59 @@
+flowchart TD
+    subgraph ClientLayer["Client & Keeper Layer"]
+        U["End User / Consumer"]
+        K["Autonomous Yield Keeper / Crank"]
+    end
+
+    subgraph ProgramBoundary["Grow Vault Program (Anchor Engine)"]
+        direction TB
+        
+        subgraph Instructions["Instruction Entrypoints"]
+            IX_DEP["deposit(amount)"]
+            IX_WTH["withdraw(shares)"]
+            IX_HRV["harvest_and_rebalance(min_yield)"]
+        end
+
+        subgraph SecurityGuards["Security & Invariant Verification"]
+            SG_SIGN["Signer & Admin Authorization Checks"]
+            SG_INFL["Inflation Defense: MINIMUM_LIQUIDITY Burn"]
+            SG_SOLV["Solvency Check: Total Assets >= Total Shares Backing"]
+            SG_REENT["Reentrancy Lock: Atomic PDA State Transition"]
+        end
+
+        subgraph PDA_Accounts["Account State (Program Derived Addresses)"]
+            VAULT["Vault State PDA\nseeds=[b'vault', authority]"]
+            RESERVE["Vault Token Reserve Account\nseeds=[b'reserve', vault_pubkey]"]
+            SHARE_MINT["Share Mint (gToken) PDA\nseeds=[b'share_mint', vault_pubkey]"]
+        end
+    end
+
+    subgraph ExternalPrograms["External Solana Primitives & CPI Targets"]
+        SPL_PROG["SPL Token / Token-2022 Program"]
+        STRAT_JITO["Jito MEV Stake Pool"]
+        STRAT_KAMINO["Kamino / Marginfi Liquidity Vault"]
+    end
+
+    %% User interactions
+    U -->|"1. Deposit USDC/SOL"| IX_DEP
+    U -->|"Redeem gTokens"| IX_WTH
+    K -->|"Execute Compound / Harvest"| IX_HRV
+
+    %% Guard validations
+    IX_DEP --> SG_INFL
+    IX_WTH --> SG_SOLV
+    IX_HRV --> SG_SIGN
+
+    SG_INFL --> SG_REENT
+    SG_SOLV --> SG_REENT
+    SG_SIGN --> SG_REENT
+
+    %% State Transitions
+    SG_REENT -->|"Mutate State / Update Total Assets"| VAULT
+    SG_REENT -->|"Transfer Principal"| RESERVE
+    SG_REENT -->|"Mint gShares"| SHARE_MINT
+
+    %% Cross Program Invocations
+    RESERVE -.->|"CPI Token Transfer"| SPL_PROG
+    SHARE_MINT -.->|"CPI Token MintTo / Burn"| SPL_PROG
+    IX_HRV -.->|"CPI Stake / Deploy Capital"| STRAT_JITO
+    IX_HRV -.->|"CPI Yield Harvest"| STRAT_KAMINO

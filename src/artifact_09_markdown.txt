@@ -1,0 +1,6 @@
+4/8 Institutional-Grade Security Architecture 🛡️
+
+Yield protocols are prime targets for flash-loan sandwich attacks. Grow mitigates this through 3 core safeguards:
+1. Oracle & Yield Slippage Guards (< 50 bps bounds).
+2. Minimum time-weighted harvest epochs (anti-reentrancy buffer).
+3. Hardcoded PDA signer seeds for share burn/mint authority.

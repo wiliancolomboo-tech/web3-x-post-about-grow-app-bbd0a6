@@ -1,0 +1,7 @@
+SOLANA_RPC_WSS=wss://api.devnet.solana.com
+PROGRAM_ID=GrowEng1ne1111111111111111111111111111111111
+TWITTER_API_KEY=your_twitter_consumer_key
+TWITTER_API_SECRET=your_twitter_consumer_secret
+TWITTER_ACCESS_TOKEN=your_twitter_user_access_token
+TWITTER_ACCESS_SECRET=your_twitter_user_access_secret
+DRY_RUN=false

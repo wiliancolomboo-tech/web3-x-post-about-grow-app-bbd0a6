@@ -1,0 +1,12 @@
+{
+  "icon": "https://growapp.xyz/assets/grow-icon-512.png",
+  "label": "Auto-Save to Grow Vault",
+  "title": "Grow App - 1-Click Spare Change Yield",
+  "description": "Deposit USDC directly into Grow App's non-custodial yield vault with automated compounding on Solana.",
+  "links": {
+    "actions": [
+      { "label": "Deposit 5 USDC", "href": "/api/actions/grow-deposit?amount=5" },
+      { "label": "Deposit 25 USDC", "href": "/api/actions/grow-deposit?amount=25" }
+    ]
+  }
+}

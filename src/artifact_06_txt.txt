@@ -1,0 +1,20 @@
++--------------------------------------------------------------------------------------------------+
+|                                    SECURITY DEFENSE MATRIX                                       |
++------------------------------------+-----------------------------------+-------------------------+
+| Threat Vector                      | Vulnerability Profile             | Grow Protocol Mitigation|
++------------------------------------+-----------------------------------+-------------------------+
+| First Depositor Inflation Attack   | Exploit zero-share base via fake  | Virtual share scaling   |
+| (ERC-4626 / Vault share dilation)  | donation to steal subsequent funds| (1e6 factor offset)     |
++------------------------------------+-----------------------------------+-------------------------+
+| PDA Seed Collision / Spoofing      | Forged Vault or Position state    | Canonical bumps checked |
+|                                    | injected by attacker              | via Anchor `seeds+bump` |
++------------------------------------+-----------------------------------+-------------------------+
+| Rogue Token Account Hijack         | Passing unverified recipient ATAs | Explicit `has_one`      |
+|                                    | to siphon withdrawal capital      | relational constraints  |
++------------------------------------+-----------------------------------+-------------------------+
+| Arithmetic Overflow / Underflow    | Integer overflow wrapped to 0     | Mandatory `checked_*`   |
+|                                    | leading to unlimited share mint   | ops with `GrowError`    |
++------------------------------------+-----------------------------------+-------------------------+
+| Unchecked External Reentrancy      | State mutation executed after     | Checks-Effects-Interactions|
+|                                    | CPI token transfers               | pattern strictly enforced|
++------------------------------------+-----------------------------------+-------------------------+

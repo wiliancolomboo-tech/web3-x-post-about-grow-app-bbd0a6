@@ -1,0 +1,30 @@
+===================================================================================================
+TIMECODE  | SCREEN DISPLAY / VISUAL                      | SPOKEN NARRATIVE (AUDIO)
+===================================================================================================
+00:00-00:15 | Split screen: Solana Mobile Saga 2 screen  | "High gas fees and slow finality have kept 
+           | displaying Grow App UI next to terminal     | real micro-investing off-chain. On EVM, a 
+           | running Anchor localnet test validator.     | $0.50 micro-deposit costs $5.00 in gas. Today, 
+           |                                             | we introduce Grow on Solana."
+---------------------------------------------------------------------------------------------------
+00:15-00:40 | Terminal running `anchor test`.            | "Grow solves this natively using Sealevel 
+           | Highlight tests passing green, displaying   | parallelization and Token-2022. Look at our 
+           | CU consumption: < 15,000 units.             | CU benchmarks: Deposits take just 14,200 
+           | Visual diagram zooms in on PDA topology.    | Compute Units—costing less than a fraction 
+           |                                             | of a tenth of a cent."
+---------------------------------------------------------------------------------------------------
+00:40-01:10 | Solana Mobile Simulator: tapping "Automate  | "Here’s how it works: A user buys coffee with 
+           | Roundups". $0.75 is rounded up and routed   | Solana Pay. Grow captures the $0.25 spare change 
+           | into Grow Master Vault PDA. Code highlights | and triggers a single-instruction deposit. 
+           | virtual share pricing equation.             | Our virtual share pricing prevents first-depositor 
+           |                                             | pool dilution while compounding every second."
+---------------------------------------------------------------------------------------------------
+01:10-01:35 | Script triggers keeper bot: Terminal shows  | "No centralized infrastructure. Anyone running our 
+           | `harvest_and_compound()` execution and the  | permissionless crank earns 50 basis points of 
+           | keeper wallet receiving instant 0.5% fee.   | yield. Capital auto-compounds back into the pool, 
+           |                                             | continuously raising the share price token ratio."
+---------------------------------------------------------------------------------------------------
+01:35-02:00 | GitHub repo displaying test matrix, clean   | "Grow is audited against inflation vectors, 
+           | architecture, and 100% test coverage badge. | fully documented, and ready for Solana Mobile 
+           | Final slide: Call to Action.                | Stack mainnet deployment. This is the financial 
+           |                                             | automation engine Web3 was meant to build. Thank you!"
+===================================================================================================

@@ -1,0 +1,73 @@
+flowchart TD
+    subgraph ClientLayer ["Client & Automation Layer"]
+        User["👤 Depositor / User"]
+        Keeper["🤖 Permissionless Keeper (Jito / Crank Bot)"]
+    end
+
+    subgraph SecurityPerimeter ["Security Guards & Policy Engine"]
+        ReentrancyGuard["🛡️ Reentrancy & Bitflag Guard"]
+        VirtualMath["📐 Virtual Offset Share Calculator (Anti-Inflation)"]
+        SlippageGuard["⏱️ Max Slippage & Min Return Verifier"]
+    end
+
+    subgraph GrowEngine ["Grow App Program (grow_vault)"]
+        InstructionRouter{"Instruction Router"}
+        
+        Init["init_vault()"]
+        Deposit["deposit()"]
+        Withdraw["withdraw()"]
+        Compound["compound_rewards()"]
+        
+        subgraph PDA_Derivation ["Deterministic PDA State Space"]
+            VaultState["Vault PDA: ['vault', token_mint]"]
+            VaultAuth["Vault Authority: ['vault_authority', vault_pubkey]"]
+            UserLedger["User Ledger PDA: ['user_ledger', vault, user]"]
+        end
+    end
+
+    subgraph StorageAndTokens ["Solana State Storage & SPL System"]
+        VaultATA["Vault Reserve Token Account (Vault Auth Owned)"]
+        UserATA["User Base Token Account"]
+        UserShareATA["User Share Token Account (Grow LP)"]
+        ShareMint["Grow Vault LP Mint (PDA Auth Owned)"]
+        YieldStrategy["External Yield Protocol (Lending/Staking Pool)"]
+    end
+
+    %% Flow routes
+    User -->|1. Request Deposit / Withdraw| SecurityPerimeter
+    Keeper -->|Trigger Auto-Compound| SecurityPerimeter
+    
+    SecurityPerimeter --> InstructionRouter
+    
+    InstructionRouter -->|Executes| Deposit
+    InstructionRouter -->|Executes| Withdraw
+    InstructionRouter -->|Executes| Compound
+
+    Deposit --> ReentrancyGuard
+    Deposit --> VirtualMath
+    VirtualMath -->|Calculate Exact LP Units| ShareMint
+    
+    Deposit -->|CPI: transfer_checked user -> vault| VaultATA
+    Deposit -->|CPI: mint_to authority -> user| UserShareATA
+    Deposit -->|Mutates| UserLedger
+
+    Withdraw --> SlippageGuard
+    Withdraw -->|CPI: burn user shares| UserShareATA
+    Withdraw -->|CPI: transfer_checked vault -> user| UserATA
+    Withdraw -->|Mutates| UserLedger
+
+    Compound -->|1. Harvest Yield Rewards| YieldStrategy
+    Compound -->|2. Swap rewards to Base Token| YieldStrategy
+    Compound -->|3. Re-inject into Reserve| VaultATA
+    Compound -->|4. Transfer Keeper Tip BPS| Keeper
+
+    VaultState -.->|Owns & Controls| VaultAuth
+    VaultAuth -.->|Signer Seeds Authority| VaultATA
+    VaultAuth -.->|Signer Seeds Authority| ShareMint
+
+    classDef security fill:#ffefef,stroke:#ff0000,stroke-width:2px;
+    classDef engine fill:#e8f4fd,stroke:#007acc,stroke-width:2px;
+    classDef storage fill:#f4fbf4,stroke:#2e7d32,stroke-width:2px;
+    class ReentrancyGuard,VirtualMath,SlippageGuard security;
+    class GrowEngine,VaultState,VaultAuth,UserLedger engine;
+    class VaultATA,UserATA,UserShareATA,ShareMint,YieldStrategy storage;

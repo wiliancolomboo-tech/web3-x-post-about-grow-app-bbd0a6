@@ -1,0 +1,42 @@
+flowchart TD
+    subgraph Hardware_Layer["Hardware Telemetry Layer (IoT Enclave)"]
+        HW["Hardware Inverter (Ed25519 Secure Enclave)"]
+        SIG["Ed25519 Signature (Timestamp + Delta kWh + Salt)"]
+        HW -->|Emit Telemetry Packet| SIG
+    end
+
+    subgraph Solana_TX["Atomic Solana Transaction Bundle"]
+        IX_PRE["Instruction 0: ed25519_program Verify Precompile"]
+        IX_GROW["Instruction 1: grow_protocol::record_telemetry()"]
+        SIG -.->|Signature Verification Check| IX_PRE
+        IX_PRE -->|Hardware Identity Attested| IX_GROW
+    end
+
+    subgraph Program_State["Grow Core Program State (Anchor)"]
+        DEV_PDA[("Device PDA: ['device', hardware_id]")]
+        GLOBAL_CONFIG[("Global Config PDA: ['config']")]
+        POOL_PDA[("Yield Pool PDA: ['yield_pool', pool_id]")]
+        
+        IX_GROW -->|Verify Signer & Epoch Monotonicity| DEV_PDA
+        DEV_PDA -->|Read Multipliers| GLOBAL_CONFIG
+        IX_GROW -->|Calculate Yield (Scaled u128)| POOL_PDA
+    end
+
+    subgraph CPI_Settlement["Token-2022 Settlement Engine"]
+        CPI_MINT["CPI: Token-2022 MintTo / Transfer"]
+        VAULT_PDA[("Token Vault PDA: ['vault', pool_id]")]
+        USER_ATA["User / Inverter Owner ATA"]
+        
+        POOL_PDA -->|Authorized PDA Signer Seeds| CPI_MINT
+        CPI_MINT -->|Debit| VAULT_PDA
+        CPI_MINT -->|Credit Verified Carbon Yield| USER_ATA
+    end
+
+    subgraph Keeper_Loop["Keeper Crons & Invariance Verification"]
+        KEEPER["Crank Keeper Bot (Automated Epoch Settle)"]
+        KEEPER -->|Check Inactivity Penalties & Slashing| DEV_PDA
+    end
+
+    %% Security and Invariance Guards
+    classDef security fill:#f96,stroke:#333,stroke-width:2px;
+    class DEV_PDA,IX_PRE,GLOBAL_CONFIG security;

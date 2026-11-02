@@ -1,0 +1,10 @@
+grow_vault automated test matrix
+    ✔ 1. [HAPPY PATH] Initializes Global Protocol Configuration (184ms)
+    ✔ 2. [SECURITY] Rejects Fee Configuration Exceeding Maximum Limit (142ms)
+    ✔ 3. [HAPPY PATH] Initializes User Vault & Associated Token Custody PDA (210ms)
+    ✔ 4. [HAPPY PATH] Executes Deposit and Enforces Dead-Share Offset (195ms)
+    ✔ 5. [SECURITY] Rejects Unauthorized Deposit Signer (118ms)
+    ✔ 6. [SECURITY] Rejects Rebalance Trigger Prior to Time Cooldown (130ms)
+    ✔ 7. [ADMIN] Pause Engine Halts Deposits (245ms)
+
+  7 passing (1.22s)

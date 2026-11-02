@@ -1,12 +1,5 @@
-[toolchain]
-anchor_version = "0.29.0"
-
-[features]
-seeds = true
-skip-lint = false
-
 [programs.localnet]
-grow_vault = "GrowVa1111111111111111111111111111111111111"
+grow_vault = "GrowApp111111111111111111111111111111111111"
 
 [registry]
 url = "https://api.apr.dev"

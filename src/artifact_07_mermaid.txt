@@ -1,0 +1,64 @@
+flowchart TD
+    subgraph ClientLayer ["Client & Keeper Layer"]
+        User["👤 Depositor (User Wallet)"]
+        Keeper["🤖 Keeper Crank / Jito Searcher"]
+        Admin["🔑 Protocol Admin / Multi-Sig"]
+    end
+
+    subgraph ProgramCore ["Grow App Anchor Program (grow_vault)"]
+        InitIx["ix: initialize_vault"]
+        DepositIx["ix: deposit"]
+        CompoundIx["ix: compound_yield"]
+        WithdrawIx["ix: withdraw"]
+        EmergencyHaltIx["ix: toggle_pause"]
+    end
+
+    subgraph StateAccounts ["Deterministic PDA State Accounts"]
+        ConfigPDA[("State PDA: ProtocolConfig<br/>seeds=[b'config']")]
+        VaultPDA[("Vault PDA: GrowVault<br/>seeds=[b'grow_vault', user, mint]")]
+        VaultTokenAcc[("Vault ATA: PDA Token Account<br/>seeds=[vault_pda, token_prog, mint]")]
+    end
+
+    subgraph ExternalCPI ["Solana Ecosystem Integrations (CPI Targets)"]
+        SPLToken["SPL Token / Token-2022 Program"]
+        YieldReserve["DeFi Yield Engine / Lending Reserve"]
+        OracleService["Pyth / Switchboard TWAP Oracle"]
+    end
+
+    %% User Interactions
+    User -->|"1. Initialize Vault"| InitIx
+    User -->|"2. Deposit Funds"| DepositIx
+    User -->|"4. Withdraw Capital + Yield"| WithdrawIx
+    Admin -->|"Admin Operations"| EmergencyHaltIx
+    Keeper -->|"3. Trigger Harvest & Rebalance"| CompoundIx
+
+    %% Instruction to PDA
+    InitIx -->|"Create & Constrain"| VaultPDA
+    InitIx -->|"Read Settings"| ConfigPDA
+    DepositIx -->|"Update balances & shares"| VaultPDA
+    DepositIx -->|"CPI: TransferChecked"| SPLToken
+    SPLToken -->|"Custody Tokens"| VaultTokenAcc
+
+    %% Compound & Yield
+    CompoundIx -->|"Verify Oracle TWAP"| OracleService
+    CompoundIx -->|"CPI: Stake / Supply Liquidity"| YieldReserve
+    YieldReserve -->|"Accrue Yield"| VaultTokenAcc
+    CompoundIx -->|"Reward Keeper Bounty"| Keeper
+
+    %% Withdraw
+    WithdrawIx -->|"Burn Shares / Verify Balance"| VaultPDA
+    WithdrawIx -->|"CPI: Transfer Out Funds"| SPLToken
+    SPLToken -->|"Transfer Tokens"| User
+
+    %% Security Guard
+    EmergencyHaltIx -.->|"Circuit Breaker Pause"| VaultPDA
+
+    classDef client fill:#3b82f6,stroke:#1d4ed8,stroke-width:2px,color:#fff;
+    classDef program fill:#8b5cf6,stroke:#6d28d9,stroke-width:2px,color:#fff;
+    classDef state fill:#10b981,stroke:#047857,stroke-width:2px,color:#fff;
+    classDef cpi fill:#f59e0b,stroke:#b45309,stroke-width:2px,color:#fff;
+
+    class User,Keeper,Admin client;
+    class InitIx,DepositIx,CompoundIx,WithdrawIx,EmergencyHaltIx program;
+    class ConfigPDA,VaultPDA,VaultTokenAcc state;
+    class SPLToken,YieldReserve,OracleService cpi;

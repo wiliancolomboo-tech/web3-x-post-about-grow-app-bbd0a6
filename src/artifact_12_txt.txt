@@ -1,0 +1,8 @@
+grow_vault automated test matrix
+    ✔ 1. Initializes the Grow App Vault successfully (412ms)
+    ✔ 2. Handles First Deposit with virtual share baseline (289ms)
+    ✔ 3. Harvests yield and compounds returns with performance fee split (315ms)
+    ✔ 4. Withdraws principal + yield faithfully preserving virtual invariants (298ms)
+    ✔ 5. Respects emergency circuit breaker pause (194ms)
+
+  5 passing (2s)

@@ -1,0 +1,8 @@
+grow_vault_integration_tests
+    ✔ 1. Successfully initializes the Grow Vault with safety parameters (1240ms)
+    ✔ 2. Executes first deposit and neutralizes inflation attack via virtual shares (485ms)
+    ✔ 3. Executes automated keeper harvest and compound cycle (390ms)
+    ✔ 4. Prevents front-running and enforces slippage protection bounds (215ms)
+    ✔ 5. Allows complete withdrawal and proportional capital return (440ms)
+
+  5 passing (3s)

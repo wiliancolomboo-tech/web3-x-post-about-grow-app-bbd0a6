@@ -1,0 +1,6 @@
+5/8 Mobile & Solana Blinks Integration 📱
+
+Grow turns complex multi-pool compounding into a 1-tap UX:
+• Solana Action / Blinks support: Deposit directly from your X feed.
+• Session Keys: Pre-authorize automated auto-compounding without repeated wallet popups.
+• Native Token-2022 compatibility for transfer hooks & confidential assets.

@@ -1,0 +1,20 @@
+Fetching live Solana state...
+
+Generated Post:
+------------------------------------
+⚡ Solana On-Chain Telemetry | @GrowApp Vault Status
+
+📊 Live Protocol Metrics (Slot: #289410214):
+• Total Value Locked (TVL): $10.000000 USDC
+• Net Auto-Compounding APY: 7.49%
+• Share Exchange Rate: $1.0204 USDC/vShare
+
+⚙️ Engine Architecture: Non-custodial PDA vault routing with continuous MEV-shielded micro-compounding.
+
+Zero manual swaps. Pure Solana execution speed.
+Verify on-chain: solscan.io/account/GrowVau1t1111111111111111111111111111111111
+
+#Solana #DeFi #Yield #GrowApp
+------------------------------------
+
+[DRY RUN] Tweet generated successfully. Skipping API broadcast.

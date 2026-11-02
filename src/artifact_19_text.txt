@@ -1,0 +1,8 @@
+grow-vault comprehensive test suite
+    ✔ 1. Initializes profile and vault accounts correctly (342ms)
+    ✔ 2. Executes a valid micro-deposit via authorized owner signer (412ms)
+    ✔ 3. Prevents micro-deposit exceeding epoch debit bounds (189ms)
+    ✔ 4. Routes accumulated reserves to strategy via signed PDA CPI (488ms)
+    ✔ 5. Allows emergency withdrawal bypassing yield routing (376ms)
+
+  5 passing (2s)

@@ -1,0 +1,67 @@
+flowchart TD
+    subgraph Client_Layer ["Client & Interface Layer"]
+        UA["End User (Mobile / SMS Wallet)"]
+        KP["Off-Chain Keeper Bot / Crank"]
+        GOV["Multi-Sig Admin / Governance"]
+    end
+
+    subgraph Program_Boundary ["Grow App Anchor Program (ProgramID: GrowApp1111111111111111111111111111111111111)"]
+        subgraph Accounts ["State Accounts (PDAs)"]
+            VS["Global Vault State PDA<br/>seeds: ['vault', asset_mint]<br/>- total_underlying<br/>- total_shares<br/>- fee_bps<br/>- is_paused"]
+            UVA["User Share Account PDA<br/>seeds: ['user-vault', user_pubkey, vault_mint]<br/>- shares_owned<br/>- deposit_timestamp"]
+            SB["Safety Buffer PDA<br/>seeds: ['safety-buffer', asset_mint]<br/>- reserve_balance"]
+            VT["Vault Token Account (Underlying ATA)<br/>seeds: ['vault-token', asset_mint]"]
+            SM["Share Mint PDA<br/>seeds: ['share-mint', asset_mint]"]
+        end
+
+        subgraph Instruction_Logic ["Instruction Pipelines"]
+            IX_DEP["Instruction: deposit()"]
+            IX_WTH["Instruction: withdraw()"]
+            IX_CRK["Instruction: harvest_and_compound()"]
+            IX_REB["Instruction: rebalance_liquidity()"]
+            IX_ADM["Instruction: update_emergency_pause()"]
+        end
+
+        subgraph Security_Guards ["Security & Verification Guards"]
+            SG_PAUSE{"Is Vault Active?"}
+            SG_SIGN{"Signer Verified?"}
+            SG_SLIP{"Slippage / Min Output Guard"}
+            SG_ORACLE{"Oracle Staleness & Range Check"}
+        end
+    end
+
+    subgraph External_Ecosystem ["External Solana Protocols (CPI Targets)"]
+        SPL_TOK["SPL Token Program / Token-2022"]
+        ORACLE_FEED["Pyth / Switchboard Price Feed"]
+        LEND_A["Upstream Lending Protocol A (e.g. Kamino)"]
+        LEND_B["Upstream Lending Protocol B (e.g. MarginFi)"]
+    end
+
+    %% Flow Connections
+    UA -->|1. Invokes Deposit| IX_DEP
+    UA -->|Invokes Withdraw| IX_WTH
+    KP -->|Invokes Crank| IX_CRK
+    GOV -->|Emergency Action| IX_ADM
+
+    IX_DEP --> SG_SIGN
+    SG_SIGN --> SG_PAUSE
+    SG_PAUSE -->|Pass| VS
+    VS -->|Calculate Exchange Rate| UVA
+    IX_DEP -->|CPI: Transfer Checked| SPL_TOK
+    SPL_TOK -->|Funds Escrowed| VT
+    IX_DEP -->|CPI: Mint Shares| SM
+    SM -->|Shares Minted to| UVA
+
+    IX_CRK --> SG_ORACLE
+    SG_ORACLE -->|Harvest Accrued Interest| LEND_A
+    LEND_A -->|Return Yield| VT
+    IX_CRK -->|Route 10% Fee| SB
+    IX_CRK -->|Distribute Keeper Bounty| KP
+
+    IX_WTH --> SG_SLIP
+    SG_SLIP -->|Burn Shares CPI| SM
+    SM -->|Release Collateral CPI| SPL_TOK
+    VT -->|Transfer Principal + Yield| UA
+
+    IX_REB -->|Evaluate Yield Delta| LEND_A
+    IX_REB -->|CPI: Rebalance Liquidity| LEND_B

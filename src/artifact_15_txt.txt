@@ -1,0 +1,17 @@
+[Threat Model & Mitigation Map]
+┌──────────────────────────────────────┬─────────────────────────────────────────────────────────────┐
+│ Attack Vector                        │ Cryptographic & Programmatic Mitigation                     │
+├──────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 1. Vault Inflation Attack            │ Virtual seed shares offset (10^6 shares) initialized on     │
+│    (Empty Vault First Depositor)     │ vault genesis. Share pricing invariant strictly non-zero.   │
+├──────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 2. Fake Keeper Attestation Spoofing  │ `has_one = keeper_authority` Anchor constraint bound to      │
+│                                      │ config PDA state; unauthorized signer transactions abort.   │
+├──────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 3. Undercollateralized APY Reporting │ Solvency Invariant Guard:                                   │
+│                                      │ `liquid_reserve + strategy_tvl >= reported_vault_tvl`.     │
+│                                      │ Transaction fails with `AttestationError::InsolventVault`.  │
+├──────────────────────────────────────┼─────────────────────────────────────────────────────────────┤
+│ 4. Reentrancy & Slot Flash Loans     │ PDA accounts updated with single sequence nonce per slot;   │
+│                                      │ state updates execute prior to downstream event emission.   │
+└──────────────────────────────────────┴─────────────────────────────────────────────────────────────┘

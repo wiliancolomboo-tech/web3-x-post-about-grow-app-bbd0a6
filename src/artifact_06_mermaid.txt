@@ -1,0 +1,42 @@
+flowchart TD
+    subgraph Physical_Layer["Physical Layer (DePIN Inverter)"]
+        A[Smart Solar Inverter / IoT Gateway] -->|Sign Telemetry with Ed25519 Device Key| B[Signed Payload: meter_id, epoch_slot, cumulative_kwh]
+    end
+
+    subgraph Transaction_Atomic_Bundle["Atomic Transaction Bundle (Solana Slot N)"]
+        subgraph IX_0["Instruction 0: Native Precompile"]
+            C[Ed25519Program.createInstructionWithPublicKey]
+            C -->|Hardware Public Key, Payload Hash, Ed25519 Signature| D[Native SigVerify Success]
+        end
+
+        subgraph IX_1["Instruction 1: Grow Telemetry Program"]
+            E[Anchor Instruction: record_verified_generation]
+            E --> F[Sysvar Instructions Introspection]
+            F -->|Verify IX_0 signature matches hardware_pubkey| G{Valid Precompile?}
+            
+            G -- No --> H[Error: InvalidSignaturePrecompile]
+            G -- Yes --> I[Load PDA: MeterTelemetryRecord]
+            
+            I --> J{Monotonicity & Slot Check}
+            J -- cumulative_kwh <= last_kwh --> K[Error: StaleOrDecreasingGeneration]
+            J -- abs(slot - current_slot) > MAX_DRIFT --> L[Error: SlotDriftExceeded]
+            
+            J -- Passed --> M[Mutate Meter State: update last_kwh & last_slot]
+            M --> N[CPI: Token-2022 MintTo]
+        end
+    end
+
+    subgraph Ledger_State["Solana Ledger State & Token-2022 Mint"]
+        N -->|Mint Verified Clean Energy Credits| O[Prover ATA: SPL Token-2022]
+        M --> P[(MeterTelemetryRecord PDA)]
+        P -->|Emit Event: GenerationVerifiedEvent| Q[Solana RPC / Geyser Plugin]
+    end
+
+    subgraph Social_Amplification["Off-Chain Attestation & Social Proof"]
+        Q --> R[Grow Keeper / Social Daemon]
+        R -->|Aggregate Slot Telemetry| S[Automated X / Twitter Telemetry Bot]
+        S -->|Tweet Real-Time Grid Impact| T[Public Social Proof & Investor Dashboard]
+    end
+
+    B --> C
+    B --> E

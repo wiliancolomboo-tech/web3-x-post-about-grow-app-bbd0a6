@@ -1,0 +1,7 @@
+Grow Core Protocol Test Suite
+    ✔ 1. Initializes the Grow Vault with mathematical parameters (412ms)
+    ✔ 2. Executes user deposit and mints proportional shares (385ms)
+    ✔ 3. Simulates external yield generation and runs auto-compound crank (1604ms)
+    ✔ 4. Allows partial withdrawal and verifies accrued yield settlement (420ms)
+
+  4 passing (3s)

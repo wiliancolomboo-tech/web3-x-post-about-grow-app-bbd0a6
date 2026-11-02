@@ -1,0 +1,48 @@
+flowchart TD
+    subgraph Client_Layer ["Client & Social Execution Layer"]
+        User["User Wallet / Mobile App"]
+        X_Blink["Solana Blink (X Post Action)"]
+        Dialect["Actions Execution Gateway"]
+        User -->|Interacts with| X_Blink
+        X_Blink -->|Fetches Action Payload| Dialect
+        Dialect -->|Constructs Serialized V0 TX| User
+    end
+
+    subgraph Program_Boundary ["Grow App Core Anchor Protocol (grow_vault)"]
+        VaultProgram["Grow Vault Program\n(Program ID: GrwV111111111111111111111111111111111111111)"]
+        
+        subgraph PDA_Storage ["State Accounts (PDAs)"]
+            GlobalConfig["Global Vault Config PDA\n['global_config', authority]"]
+            UserVault["User Vault State PDA\n['user_vault', owner, mint]"]
+            ReserveVault["Protocol Token Reserve PDA\n['token_reserve', mint]"]
+        end
+
+        subgraph Guards ["Security & Validation Invariants"]
+            ReentrancyGuard["Atomic Slot Guard / Rent-Exempt Check"]
+            SignerCheck["Signer Validation & Owner Constraint"]
+            SlippageGuard["Oracle Price & Share Ratio Verification"]
+        end
+    end
+
+    subgraph Yield_Primitives ["Solana DeFi Routing Primitives (CPI Target)"]
+        Kamino["Kamino Finance / Yield Pool"]
+        Marginfi["Marginfi Lending Reserve"]
+        Drift["Drift Delta-Neutral Market"]
+    end
+
+    subgraph Keeper_Subsystem ["Off-Chain Keeper & Social Attestation Engine"]
+        Keeper["Autonomous Keeper Bot"]
+        PythOracle["Pyth Network / Switchboard Oracle"]
+        X_Poster["X / Twitter Developer API v2"]
+        
+        Keeper -->|Polls APY & TVL| PythOracle
+        Keeper -->|Triggers Harvest & Rebalance| VaultProgram
+        Keeper -->|Signs & Posts Proof Tweet| X_Poster
+    end
+
+    User -->|Sign & Broadcast V0 TX| VaultProgram
+    VaultProgram --> Guards
+    Guards --> PDA_Storage
+    PDA_Storage -->|Cross-Program Invocation (CPI)| Yield_Primitives
+    Yield_Primitives -->|Yield Accrual / Staking Tokens| ReserveVault
+    ReserveVault -->|Mint Vault LP Shares| UserVault

@@ -1,0 +1,46 @@
+================================================================================
+[00:00 - 00:20] HOOK & THE $400 GAS PARADOX
+Visual: Split screen. 
+Left: Ethereum Metamask showing $18 gas fee to deposit $3 of spare change (Transaction Failed: Insufficient Gas).
+Right: Solana Chapter 2 device running Grow App; with a single thumbprint touch, a $3 roundup is deposited instantly. 
+Narrative (Voiceover):
+"Every year, billions of dollars in consumer spare change sit idle, yielding zero percent. 
+Bringing micro-investing on-chain has always been dead on arrival because EVM gas turns a 
+$2 roundup into a $15 loss. Today, that paradox ends with Grow App on Solana."
+
+================================================================================
+[00:20 - 00:50] SYSTEM ARCHITECTURE & SMS SEED VAULT
+Visual: Screen recording zooms into the Grow App UI. Clean, fluid, 120 FPS interface. 
+User toggles 'Automated Roundup Stream'. Camera cuts to Anchor Architecture Flowchart 
+showing PDA isolation and CPI to Kamino/Jito yield engines.
+Narrative:
+"Built from the ground up for Solana Mobile and Chapter 2, Grow bridges hardware-level 
+security with high-throughput DeFi. Using the Solana Mobile Stack Seed Vault, your keys 
+never touch Android memory. Transactions are pre-authorized within safe spending caps, 
+streaming micro-amounts directly into our non-custodial Anchor Vault with sub-second 
+finality and less than half a cent in fees."
+
+================================================================================
+[00:50 - 01:25] LIVE TECHNICAL CRANK DEMO & SECURITY
+Visual: Terminal side-by-side with Solana Explorer (Solscan). 
+Running `anchor test --skip-lint`. Tests pass (5/5 green checkmarks). 
+A keeper bot runs `harvest_and_compound()`, showing an on-chain event emitted: 
+"Gross Yield: +5.00 USDC, Keeper Bounty: 0.025 USDC, Shares Intact."
+Narrative:
+"Under the hood, Grow protects user funds with military-grade safety. We’ve eliminated 
+the classic first-depositor inflation attack with virtual dead shares. Redemptions feature 
+strict programmatic slippage barriers, and our decentralized keeper network continuously 
+compounds interest permissionlessly—paying searchers fair MEV tips without draining 
+principal. Zero reentrancy, zero custodial risk, and just 28,000 Compute Units per deposit."
+
+================================================================================
+[01:25 - 02:00] THE WINNING PITCH & CONCLUSION
+Visual: Camera returns to host holding Solana Chapter 2 phone with Grow App live, 
+showing portfolio growth compounding in real-time. Closing slide with GitHub repo, 
+X handle, and live Devnet contract address.
+Narrative:
+"Grow App transforms Solana into the automated savings backend for the world. 
+It’s not just a yield app; it is the consumer gateway that will onboard the next 
+100 million smartphone users into the decentralized economy. 
+Fast, secure, and mobile-native. That is why Grow App wins 1st place. Thank you."
+================================================================================

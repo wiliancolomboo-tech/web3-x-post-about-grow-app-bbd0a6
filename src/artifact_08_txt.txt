@@ -1,0 +1,27 @@
+========================================================================================================
+TIMECODE | SCREEN ACTION / VISUAL                                | AUDIO NARRATIVE (SPOKEN SCRIPT)
+========================================================================================================
+00:00 -  | Split screen: Slow EVM pending transaction ($45 gas)  | "Yield aggregation in DeFi is broken. On Ethereum
+00:15    | vs. Instant Solana confirmation on Grow App.          | and L2s, compounding costs a fortune, leaving user
+         | Dynamic graphic shows "Sub-Second Auto-Compounding".  | yields fragmented and dormant."
+--------------------------------------------------------------------------------------------------------
+00:15 -  | Architecture 3D rendering of Grow Protocol:           | "Meet Grow App. Built from the ground up for Solana,
+00:35    | PDA State -> CPI Router -> Kamino/Marginfi/Orca.       | Grow is an autonomous, non-custodial yield engine
+         | Visual arrows showing lightning-fast token flow.      | that rebalances capital at sub-second block speeds."
+--------------------------------------------------------------------------------------------------------
+00:35 -  | Terminal screen running `anchor test`.                | "Under the hood, our custom Anchor vault utilizes
+00:55    | All 4 integration tests pass in green.               | PDA-isolated vaults, eliminating smart contract co-
+         | Code highlight of `shares_to_mint` math.              | mingling and nullifying first-depositor inflation attacks."
+--------------------------------------------------------------------------------------------------------
+00:55 -  | Real-time screencast of user depositing 1,000 USDC.   | "Watch this live deposit: one signature, 400 milliseconds,
+01:20    | Wallet pop-up confirms instantly. Balance updates.    | and zero friction. Grow immediately routes the capital
+         | Phantom notification shows Grow LP shares received.   | to the highest risk-adjusted yield pool across the ecosystem."
+--------------------------------------------------------------------------------------------------------
+01:20 -  | Telemetry script triggers: terminal logs harvest      | "Our off-chain keeper engine harvests rewards, swaps
+01:40    | event. Browser window opens showing live post on X    | them atomically via Orca CPI, and broadcasts cryptographic
+         | published with real-time APY & TVL metrics.           | on-chain telemetry straight to X for total transparency."
+--------------------------------------------------------------------------------------------------------
+01:40 -  | Final summary screen: High APY stats, GitHub QR code, | "Sub-second finality. Autonomous rebalancing. Real yield.
+02:00    | Link to app.grow.fi and X handle @GrowProtocol.       | Grow App turns Solana into the ultimate wealth machine.
+         | Clean fade out with branding logo.                    | Thank you, and let’s grow Solana together."
+========================================================================================================

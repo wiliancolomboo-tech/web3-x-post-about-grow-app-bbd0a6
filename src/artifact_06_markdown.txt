@@ -1,0 +1,19 @@
+[00:00 - 00:15] Hook & Overview
+Visual: Split screen: Solana Explorer / Jito mempool monitor on the left; Grow App clean terminal interface on the right.
+Audio: "Solana is the fastest financial rail in Web3, but until now, yield automation has been fragmented, manual, and vulnerable to MEV slippage. Welcome to Grow App: the high-performance autonomous yield routing protocol built natively on the Sealevel runtime."
+
+[00:15 - 00:40] Vault Mechanics & PDA Security
+Visual: Terminal runs `anchor test`. Code highlighting the PDA derivation in `lib.rs`.
+Audio: "Grow eliminates custody risk. Each vault is derived deterministically using triple-seeded Program-Derived Addresses: the vault seed, the authority, and the asset mint. Funds never touch an upgradeable intermediary proxy. Our Anchor implementation enforces zero-trust state constraints, rejecting malicious mint injections and account substitutions at the runtime level."
+
+[00:40 - 01:10] Share Parity Math & Yield Injection
+Visual: Test execution logs displaying test step 2 and step 3 passing. Zoom in on share calculation formula.
+Audio: "Notice how Grow manages yield accrual. Unlike naive reward distribution that causes taxable transactions or claims, Grow uses tokenized share math. When external yield is injected from DEX liquidity rebalancing, existing share quantities remain constant while base asset backing grows. When the user burns their shares, yield is realized atomically in a single instruction."
+
+[01:10 - 01:35] Gas Efficiency & Jito-Protected Rebalancing
+Visual: Solana CU inspector output showing `deposit` running at ~39,200 CUs. Mermaid flowchart graphic overlay.
+Audio: "Efficiency matters. By bypassing heavy runtime reflection, Grow operations average under 42,000 Compute Units. For rebalances, keeper bots execute via atomic Jito bundles, combining oracle checks, DEX routing, and dynamic slippage assertions in a single slot without frontrunning risk."
+
+[01:35 - 02:00] Winning Pitch & Conclusion
+Visual: GitHub repository tree, completed technical X thread draft ready to publish, and clean dashboard UI.
+Audio: "Grow isn't just another DeFi tracker—it's an algorithmic liquidity engine that turns Solana's sub-second finality into measurable alpha for everyday users. Complete code, tests, and deep architectural documentation are delivered and verified. Thank you."

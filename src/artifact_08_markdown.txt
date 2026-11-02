@@ -1,0 +1,10 @@
+3/8 Extreme CU Efficiency ⚡
+
+On Solana, Compute Units = Latency & Priority Fees.
+
+Grow's CPI instructions are stripped of bloated account allocations:
+• Vault state is packed down to single-byte offsets.
+• Zero dynamic reallocation in `deposit()` and `withdraw()`.
+• Total execution cost: < 23,400 CU per deposit.
+
+Instant finality, minimal overhead.

@@ -1,0 +1,18 @@
++---------------------------------------------------------------------------------------------------+
+| SECURITY VECTOR               PROTECTION MECHANISM               INVARIANT ENFORCED               |
++===================================================================================================+
+| First-Depositor Inflation     Virtual Share/Asset Offsets        Shares = (Assets * (S + 10^3))   |
+| Attack                        (VIRTUAL_OFFSET = 10^3)            / (Assets + 1)                   |
++-------------------------------+----------------------------------+--------------------------------+
+| Account Substitution          PDA Derived Seed Bounding          seeds = [b"vault_config", mint]  |
+|                                                                  has_one checks on reserve & mint |
++-------------------------------+----------------------------------+--------------------------------+
+| Slippage Manipulation         Explicit parameter checks          require!(shares >= min_shares)   |
+| (MEV Sandwiching)                                                require!(assets >= min_assets)   |
++-------------------------------+----------------------------------+--------------------------------+
+| Unlimited Fee Governance      Hardcoded Cap Check                require!(fee_bps <= 2000)        |
+| Rugpull                                                          (Max 20% limit enforced in code) |
++-------------------------------+----------------------------------+--------------------------------+
+| Unauthorized Drain            No Admin Withdraw Method           Assets leave reserve ONLY via    |
+|                                                                  share burns or fee distribution  |
++---------------------------------------------------------------------------------------------------+

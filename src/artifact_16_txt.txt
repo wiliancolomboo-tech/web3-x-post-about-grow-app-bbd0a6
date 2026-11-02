@@ -1,0 +1,14 @@
+[00:00 - 00:15] Visual: Screen recording of X thread with rich-preview visual diagrams and code blocks.
+Voiceover (Pitch): "Most consumer DeFi applications ask you to trust a closed web frontend. But in DeFi, if it's not cryptographically proven on-chain, it doesn't exist. Today, we break down Grow App on Solana—the algorithmic vault protocol redefining capital efficiency."
+
+[00:15 - 00:40] Visual: Deep-dive into Mermaid architecture diagram zooming in on PDA vault structure and Kamino/Meteora dynamic routers.
+Voiceover: "In this 10-part technical X thread, we deconstruct Grow’s non-custodial architecture. We show how Grow solves liquidity fragmentation across Solana using single-transaction atomic CPI routing—routing capital between lending markets and dynamic AMM bins at sub-15,000 compute units per swap."
+
+[00:40 - 01:10] Visual: Terminal showing VS Code with Anchor program `grow-attestor` running `anchor test`. All 4 tests pass with green checkmarks.
+Voiceover: "To prove this isn't just marketing, we engineered the Grow Attestation Program: an on-chain Anchor verification oracle. It validates liquid reserves against strategy allocations, guarantees solvency ratios above 100%, and outputs immutable ledger records per epoch. No spoofing. Zero unauthorized reporting."
+
+[01:10 - 01:40] Visual: Execution of `python3 bot/attestation_publisher.py` generating a live cryptographic attestation tweet with Solscan link.
+Voiceover: "Our autonomous Sentinel daemon monitors Solana slots in real time, computes reserve deltas, and automatically publishes signed attestation proofs directly to X. Developers and users can audit real-time APY and backing reserves right from their feed with zero latency."
+
+[01:40 - 02:00] Visual: Fast recap slide showing CU benchmarks (-70% savings), thread impressions, and GitHub repository.
+Voiceover: "By combining institutional-grade Rust code, mathematically rigorous share accounting, and high-impact developer storytelling on X, this submission delivers the highest technical signal for Grow App and the Solana ecosystem. Thank you."

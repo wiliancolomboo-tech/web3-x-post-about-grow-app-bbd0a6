@@ -1,0 +1,8 @@
+7/8 Grow isn’t just a savings account; it’s an autonomous liquidity routing primitive on Solana.
+
+Fast. Non-custodial. Cryptographically secure.
+
+Check out the open-source architecture and start putting your capital to work:
+🔗 https://grow.corvus.io (or your live deployment URL)
+
+Tagging: @Solana @solana_devs #Solana #DeFi #Rust

@@ -1,0 +1,14 @@
+Solana DeFi yields are fragmented across @Marginfi, @KaminoFinance, and @Orca_so. Manual rebalancing bleeds your alpha through latency and missed compounding ticks.
+
+Enter @GrowApp — Solana’s native algorithmic liquidity vault engine. 
+
+Here is why its architecture is fundamentally different:
+
+⚡ Continuous Micro-Compounding: Utilizing Solana's 400ms slots, Grow auto-compounds yield intraday with sub-$0.001 keeper execution overhead.
+🔒 Deterministic PDA Vaults: Zero counterparty custodial risk. Dynamic share pricing protects depositors from sandwich dilution and oracle staleness.
+📊 Smart Allocation Routing: Deposits automatically route to risk-weighted delta-neutral vaults and CLMM rebalances.
+
+No idle capital. Pure computational efficiency.
+
+We audited the on-chain Anchor codebase & verified the invariants. Check out the complete technical deep dive and benchmarks below 👇 🧵
+#Solana #DeFi #Rust #Anchor

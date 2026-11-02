@@ -1,0 +1,4 @@
+3/14 🏗️ Core Architecture:
+Grow operates on a dual-engine model:
+1. Client-Side: Mobile-native background roundups via Solana Mobile Stack (SMS) & Seed Vault.
+2. On-Chain: Anchor-based permissionless auto-compounding vaults executing batched CPIs into top Solana yield primitives (Kamino, Marinade, Jito).

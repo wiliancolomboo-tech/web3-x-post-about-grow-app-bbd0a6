@@ -1,0 +1,53 @@
+flowchart TD
+    subgraph Client ["Client Layer (Solana Mobile / Web)"]
+        User["User Wallet / SMS Seed Vault"]
+        Keeper["Autonomous Keeper / Jito Crank"]
+    end
+
+    subgraph SecurityGuards ["Security & Access Control Matrix"]
+        SignerCheck{"Signer Check & Spending Cap"}
+        StaleOracle{"Oracle Staleness Guard (< 30s)"}
+        SlippageGuard{"Slippage & Min Return Guard"}
+        CircuitBreaker{"Emergency Pause Guard"}
+    end
+
+    subgraph GrowProgram ["Grow Protocol Core Engine (Anchor Program)"]
+        InitVault["init_vault()"]
+        Deposit["deposit()"]
+        Withdraw["withdraw()"]
+        Harvest["harvest_and_compound()"]
+        
+        subgraph PDA_State ["On-Chain PDA Accounts"]
+            GlobalVault["Global Vault PDA\n['grow_vault', mint]\n- total_shares\n- total_underlying\n- fee_basis_points\n- paused_status"]
+            UserPosition["User Position PDA\n['user_position', user, vault]\n- deposited_shares\n- last_deposit_slot\n- reward_debt"]
+            TokenVault["Vault SPL Token Account\n['vault_token', vault]"]
+        end
+    end
+
+    subgraph ExternalDeFi ["External Solana Liquidity & Yield Layer"]
+        LendingPool["Yield Adapter (e.g. Kamino / Jito / Marginfi)"]
+        PythOracle["Pyth / Switchboard Price Feed"]
+    end
+
+    %% User Flow
+    User -->|1. Sign Deposit Tx| SignerCheck
+    SignerCheck -->|Valid Signer| CircuitBreaker
+    CircuitBreaker -->|Unpaused| Deposit
+    Deposit -->|2. Transfer Token| TokenVault
+    Deposit -->|3. Mint Internal Shares| UserPosition
+    Deposit -->|4. Update State| GlobalVault
+
+    %% Keeper Flow
+    Keeper -->|Trigger Rebalance/Compound| Harvest
+    Harvest -->|Verify Price Freshness| StaleOracle
+    StaleOracle -->|Fresh Data| PythOracle
+    Harvest -->|Allocate Liquidity CPI| LendingPool
+    LendingPool -->|Return Yield Yield Distribution| TokenVault
+    Harvest -->|Pay Keeper Bounty %| Keeper
+
+    %% Withdraw Flow
+    User -->|Redeem Shares| SlippageGuard
+    SlippageGuard -->|Passes Min-Out| Withdraw
+    Withdraw -->|Burn Shares| UserPosition
+    Withdraw -->|Transfer Out SPL| TokenVault
+    TokenVault -->|Send Tokens| User

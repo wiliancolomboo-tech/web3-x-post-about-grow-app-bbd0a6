@@ -1,0 +1,12 @@
+{
+  "icon": "https://grow.app/logo.png",
+  "label": "Deposit 100 USDC",
+  "title": "Grow High-Yield Vault",
+  "description": "Earn 8.4% APY powered by Solana native liquidity routing.",
+  "links": {
+    "actions": [
+      { "label": "Deposit 100 USDC", "href": "/api/actions/grow?amount=100" },
+      { "label": "Deposit 500 USDC", "href": "/api/actions/grow?amount=500" }
+    ]
+  }
+}

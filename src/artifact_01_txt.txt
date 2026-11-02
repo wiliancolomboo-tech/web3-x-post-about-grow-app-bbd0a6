@@ -1,0 +1,11 @@
++-----------------------------------------------------------------------------------------------+
+|                                    GROW PROTOCOL CORE VALUE                                  |
++-----------------------------------------------------------------------------------------------+
+|  Metric                     | Legacy EVM Micro-Yield         | Grow Protocol on Solana        |
++-----------------------------+--------------------------------+--------------------------------+
+| Average Settlement Latency  | 12 - 90 seconds                | ~400 ms                        |
+| Transaction Cost            | $1.50 - $25.00                 | < $0.0005 (0.000005 SOL)       |
+| Micro-Deposit Threshold     | $50.00 (economic min)          | $0.01 (dust-tolerant)          |
+| Execution Architecture      | Sequential EVM Memory Ops      | Sealevel Parallel SIMD Runtime |
+| Rebalancing Triggers        | High-gas Chainlink Automations | Ephemeral PDA Crank Keepers    |
++-----------------------------------------------------------------------------------------------+

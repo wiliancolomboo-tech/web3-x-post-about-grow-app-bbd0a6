@@ -6,188 +6,199 @@ import {
   createAccount,
   mintTo,
   getAccount,
+  TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import { expect } from "chai";
 
-describe("grow_vault_integration_matrix", () => {
+describe("grow-vault E2E QA Verification Suite", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
   const program = anchor.workspace.GrowVault as Program<GrowVault>;
 
-  let baseMint: anchor.web3.PublicKey;
-  let vaultPda: anchor.web3.PublicKey;
+  const admin = Keypair.generate();
+  const user = Keypair.generate();
+  const keeper = Keypair.generate();
+
+  let mint: PublicKey;
+  let userAta: PublicKey;
+  let keeperAta: PublicKey;
+  let vaultAta: PublicKey;
+  let configPda: PublicKey;
+  let vaultPda: PublicKey;
   let vaultBump: number;
-  let authorityPda: anchor.web3.PublicKey;
-  let authorityBump: number;
-  let shareMintPda: anchor.web3.PublicKey;
-  let vaultTokenPda: anchor.web3.PublicKey;
 
-  const admin = (provider.wallet as anchor.Wallet).payer;
-  const testUser = anchor.web3.Keypair.generate();
-
-  let userBaseAccount: anchor.web3.PublicKey;
-  let userShareAccount: anchor.web3.PublicKey;
-
-  const INITIAL_USER_BALANCE = 10_000_000_000; // 10,000 USDC (6 decimals)
-  const DEPOSIT_AMOUNT = 1_000_000_000; // 1,000 USDC
+  const DECIMALS = 6;
+  const INITIAL_MINT_AMOUNT = 1_000_000_000; // 1,000 Tokens (6 decimals)
+  const DEPOSIT_AMOUNT = new anchor.BN(250_000_000); // 250 Tokens
 
   before(async () => {
-    // 1. Airdrop SOL to test user
-    const sig = await provider.connection.requestAirdrop(
-      testUser.publicKey,
-      2 * anchor.web3.LAMPORTS_PER_SOL
-    );
-    await provider.connection.confirmTransaction(sig);
+    // Fund test keypairs via provider wallet
+    for (const kp of [admin, user, keeper]) {
+      const tx = await provider.connection.requestAirdrop(
+        kp.publicKey,
+        2 * anchor.web3.LAMPORTS_PER_SOL
+      );
+      await provider.connection.confirmTransaction(tx);
+    }
 
-    // 2. Create Base Token Mint (USDC simulation)
-    baseMint = await createMint(
+    // Create Base Token Mint
+    mint = await createMint(
       provider.connection,
       admin,
       admin.publicKey,
       null,
-      6
+      DECIMALS
     );
 
-    // 3. Derive PDAs
-    [vaultPda, vaultBump] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("vault"), baseMint.toBuffer()],
+    // Derive Global Config PDA
+    [configPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from("global_config")],
       program.programId
     );
 
-    [authorityPda, authorityBump] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("authority"), vaultPda.toBuffer()],
+    // Derive User Vault PDA
+    [vaultPda, vaultBump] = PublicKey.findProgramAddressSync(
+      [Buffer.from("grow_vault"), user.publicKey.toBuffer(), mint.toBuffer()],
       program.programId
     );
 
-    [shareMintPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("share_mint"), vaultPda.toBuffer()],
-      program.programId
-    );
-
-    [vaultTokenPda] = anchor.web3.PublicKey.findProgramAddressSync(
-      [Buffer.from("vault_tokens"), vaultPda.toBuffer()],
-      program.programId
-    );
-
-    // 4. Create user token accounts
-    userBaseAccount = await createAccount(
+    // Create User, Keeper, and Vault ATAs
+    userAta = await createAccount(
       provider.connection,
-      testUser,
-      baseMint,
-      testUser.publicKey
+      user,
+      mint,
+      user.publicKey
     );
 
-    userShareAccount = await createAccount(
+    keeperAta = await createAccount(
       provider.connection,
-      testUser,
-      shareMintPda,
-      testUser.publicKey
+      keeper,
+      mint,
+      keeper.publicKey
     );
 
-    // 5. Fund test user
+    vaultAta = await createAccount(
+      provider.connection,
+      user,
+      mint,
+      vaultPda
+    );
+
+    // Mint tokens to user
     await mintTo(
       provider.connection,
       admin,
-      baseMint,
-      userBaseAccount,
+      mint,
+      userAta,
       admin.publicKey,
-      INITIAL_USER_BALANCE
+      INITIAL_MINT_AMOUNT
     );
   });
 
-  it("Initializes the Grow Vault with correct PDA authority and parameters", async () => {
+  it("1. Initializes global protocol configuration", async () => {
     await program.methods
-      .initializeVault(vaultBump, authorityBump)
+      .initializeConfig(100, 150) // 1% protocol fee, 1.5% keeper fee
       .accounts({
-        vault: vaultPda,
-        vaultAuthority: authorityPda,
-        baseMint: baseMint,
-        shareMint: shareMintPda,
-        vaultTokenAccount: vaultTokenPda,
+        config: configPda,
         admin: admin.publicKey,
         systemProgram: anchor.web3.SystemProgram.programId,
-        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
-        rent: anchor.web3.SYSVAR_RENT_PUBKEY,
       })
       .signers([admin])
       .rpc();
 
-    const vaultAccount = await program.account.vaultState.fetch(vaultPda);
-    expect(vaultAccount.admin.toBase58()).to.equal(admin.publicKey.toBase58());
-    expect(vaultAccount.baseMint.toBase58()).to.equal(baseMint.toBase58());
-    expect(vaultAccount.totalStrategyAllocation.toNumber()).to.equal(0);
+    const configAccount = await program.account.globalConfig.fetch(configPda);
+    expect(configAccount.admin.toBase58()).to.equal(admin.publicKey.toBase58());
+    expect(configAccount.protocolFeeBps).to.equal(100);
+    expect(configAccount.keeperIncentiveBps).to.equal(150);
   });
 
-  it("Executes user deposit: transfers base assets and issues proportional shares", async () => {
+  it("2. Initializes non-custodial user vault", async () => {
     await program.methods
-      .deposit(new anchor.BN(DEPOSIT_AMOUNT))
+      .initializeVault()
       .accounts({
         vault: vaultPda,
-        vaultAuthority: authorityPda,
-        shareMint: shareMintPda,
-        vaultTokenAccount: vaultTokenPda,
-        userBaseAccount: userBaseAccount,
-        userShareAccount: userShareAccount,
-        user: testUser.publicKey,
-        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        config: configPda,
+        mint: mint,
+        owner: user.publicKey,
+        systemProgram: anchor.web3.SystemProgram.programId,
       })
-      .signers([testUser])
+      .signers([user])
       .rpc();
 
-    const userShares = await getAccount(provider.connection, userShareAccount);
-    const vaultTokens = await getAccount(provider.connection, vaultTokenPda);
-
-    expect(Number(userShares.amount)).to.equal(DEPOSIT_AMOUNT);
-    expect(Number(vaultTokens.amount)).to.equal(DEPOSIT_AMOUNT);
+    const vaultAccount = await program.account.userVault.fetch(vaultPda);
+    expect(vaultAccount.owner.toBase58()).to.equal(user.publicKey.toBase58());
+    expect(vaultAccount.totalDeposited.toNumber()).to.equal(0);
+    expect(vaultAccount.totalShares.toNumber()).to.equal(0);
   });
 
-  it("Fails when withdrawal violates slippage tolerance", async () => {
-    const excessiveMinOut = new anchor.BN(DEPOSIT_AMOUNT + 1_000_000); // Demanding more than available
+  it("3. Executes verified deposit & share issuance", async () => {
+    await program.methods
+      .deposit(DEPOSIT_AMOUNT)
+      .accounts({
+        vault: vaultPda,
+        mint: mint,
+        userTokenAccount: userAta,
+        vaultTokenAccount: vaultAta,
+        owner: user.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([user])
+      .rpc();
 
+    const vaultAccount = await program.account.userVault.fetch(vaultPda);
+    expect(vaultAccount.totalDeposited.toString()).to.equal(DEPOSIT_AMOUNT.toString());
+    expect(vaultAccount.totalShares.toString()).to.equal(DEPOSIT_AMOUNT.toString());
+
+    const vaultBalance = await getAccount(provider.connection, vaultAta);
+    expect(vaultBalance.amount.toString()).to.equal(DEPOSIT_AMOUNT.toString());
+  });
+
+  it("4. Prevents compounding before cooldown passes", async () => {
     try {
       await program.methods
-        .withdraw(new anchor.BN(DEPOSIT_AMOUNT), excessiveMinOut)
+        .compoundAndHarvest(new anchor.BN(5_000_000))
         .accounts({
           vault: vaultPda,
-          vaultAuthority: authorityPda,
-          shareMint: shareMintPda,
-          vaultTokenAccount: vaultTokenPda,
-          userShareAccount: userShareAccount,
-          userBaseAccount: userBaseAccount,
-          user: testUser.publicKey,
-          tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+          config: configPda,
+          mint: mint,
+          vaultTokenAccount: vaultAta,
+          keeperTokenAccount: keeperAta,
+          keeper: keeper.publicKey,
+          tokenProgram: TOKEN_PROGRAM_ID,
         })
-        .signers([testUser])
+        .signers([keeper])
         .rpc();
-      expect.fail("Expected transaction to fail with SlippageExceeded");
+      expect.fail("Expected cooldown check to fail");
     } catch (err: any) {
-      expect(err.error.errorCode.code).to.equal("SlippageExceeded");
+      expect(err.error.errorCode.code).to.equal("CompoundingTooFrequent");
     }
   });
 
-  it("Executes valid full withdrawal and verifies round-trip token balance integrity", async () => {
-    const userSharesBefore = await getAccount(provider.connection, userShareAccount);
+  it("5. Completes partial withdrawal with accurate share calculation", async () => {
+    const sharesToWithdraw = new anchor.BN(100_000_000); // 100 Tokens
 
     await program.methods
-      .withdraw(new anchor.BN(userSharesBefore.amount.toString()), new anchor.BN(DEPOSIT_AMOUNT))
+      .withdraw(sharesToWithdraw)
       .accounts({
         vault: vaultPda,
-        vaultAuthority: authorityPda,
-        shareMint: shareMintPda,
-        vaultTokenAccount: vaultTokenPda,
-        userShareAccount: userShareAccount,
-        userBaseAccount: userBaseAccount,
-        user: testUser.publicKey,
-        tokenProgram: anchor.utils.token.TOKEN_PROGRAM_ID,
+        mint: mint,
+        vaultTokenAccount: vaultAta,
+        userTokenAccount: userAta,
+        owner: user.publicKey,
+        tokenProgram: TOKEN_PROGRAM_ID,
       })
-      .signers([testUser])
+      .signers([user])
       .rpc();
 
-    const userBaseAfter = await getAccount(provider.connection, userBaseAccount);
-    const userSharesAfter = await getAccount(provider.connection, userShareAccount);
+    const vaultAccount = await program.account.userVault.fetch(vaultPda);
+    expect(vaultAccount.totalShares.toNumber()).to.equal(150_000_000);
+    expect(vaultAccount.totalDeposited.toNumber()).to.equal(150_000_000);
 
-    expect(Number(userSharesAfter.amount)).to.equal(0);
-    expect(Number(userBaseAfter.amount)).to.equal(INITIAL_USER_BALANCE);
+    const userTokenBalance = await getAccount(provider.connection, userAta);
+    expect(userTokenBalance.amount.toString()).to.equal(
+      (INITIAL_MINT_AMOUNT - 150_000_000).toString()
+    );
   });
 });

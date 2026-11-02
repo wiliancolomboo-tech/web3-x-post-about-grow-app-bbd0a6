@@ -1,0 +1,4 @@
+X_API_KEY=your_consumer_api_key
+X_API_SECRET=your_consumer_api_secret
+X_ACCESS_TOKEN=your_user_access_token
+X_ACCESS_SECRET=your_user_access_token_secret

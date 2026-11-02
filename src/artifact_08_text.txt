@@ -1,0 +1,10 @@
+Grow Vault Comprehensive Test Matrix
+    ✔ Test 1: Initializes the Grow Vault with correct PDA permissions (184ms)
+    ✔ Test 2: User A deposits 1,000 USDC -> receives exactly 1,000 $gUSD (1:1 basis) (210ms)
+    ✔ Test 3: Accrues 100 USDC Yield & Keeper compounds successfully (195ms)
+    ✔ Test 4: User B deposits 550 USDC after yield accrual -> receives proportionate discounted shares (204ms)
+    ✔ Test 5: User A withdraws all 1,000 shares -> receives principal + 100% of accrued yield (222ms)
+    ✔ Test 6: Security Guard Check - Unauthorized keeper is rejected (89ms)
+    ✔ Test 7: Emergency Pause Check - Prevents deposits while paused (92ms)
+
+  7 passing (1.2s)

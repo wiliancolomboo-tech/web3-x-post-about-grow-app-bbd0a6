@@ -1,0 +1,18 @@
+┌──────────────────────────┬───────────────────────────────┬────────────────────────────────────────┐
+│ Attack Vector            │ Solana Danger Profile         │ Grow Protocol Concrete Mitigation     │
+├──────────────────────────┼───────────────────────────────┼────────────────────────────────────────┤
+│ PDA Seed Collision /     │ Attacker injects malformed    │ Canonical seed derivation enforcing    │
+│ Substitution             │ accounts into vault context   │ seeds=[b"grow_vault", owner, mint]     │
+├──────────────────────────┼───────────────────────────────┼────────────────────────────────────────┤
+│ Reentrancy / CPI Loop    │ External program re-calls     │ Rust ownership checks + state mutated   │
+│                          │ vault before balance updates  │ BEFORE cross-program transfer (CEI)   │
+├──────────────────────────┼───────────────────────────────┼────────────────────────────────────────┤
+│ Integer Overflow /       │ Precision loss or overflow in │ Safe native checked math throughout    │
+│ Share Dilution           │ share minting math            │ (checked_mul, checked_div, u128 cast)  │
+├──────────────────────────┼───────────────────────────────┼────────────────────────────────────────┤
+│ Front-Running Harvest    │ MEV Searchers sandwiching     │ Minimum compound intervals (60s lock)  │
+│                          │ yield payouts                 │ + Jito Tip Bundle execution guards     │
+├──────────────────────────┼───────────────────────────────┼────────────────────────────────────────┤
+│ Fake Mint / ATA Spoofing │ Transferring worthless tokens │ InterfaceAccount validation tied to    │
+│                          │ in place of real collateral   │ vault.mint state variable              │
+└──────────────────────────┴───────────────────────────────┴────────────────────────────────────────┘

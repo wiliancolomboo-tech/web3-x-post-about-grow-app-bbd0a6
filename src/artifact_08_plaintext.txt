@@ -1,0 +1,8 @@
+Grow Vault Comprehensive Test Harness
+    ✔ 1. Initializes the Grow Vault successfully (412ms)
+    ✔ 2. Executes first deposit and verifies proportional share minting (285ms)
+    ✔ 3. Enforces slippage guard check (198ms)
+    ✔ 4. Withdraws capital and burns shares with full mathematical parity (310ms)
+    ✔ 5. Activates emergency pause guard and blocks subsequent deposits (172ms)
+
+  5 passing (1.4s)

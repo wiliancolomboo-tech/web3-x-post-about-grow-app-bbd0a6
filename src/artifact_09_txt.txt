@@ -1,0 +1,6 @@
+Speed means nothing without institutional security:
+🔒 Checks-Effects-Interactions pattern stops reentrancy cold.
+🔒 First-depositor share inflation exploits mathematically neutralized.
+🔒 Non-upgradeable PDA signer constraints protect all reserves.
+
+Financial sovereignty isn't a slogan; it's our codebase. [5/6]

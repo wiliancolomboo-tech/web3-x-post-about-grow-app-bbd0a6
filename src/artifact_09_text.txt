@@ -1,7 +1,7 @@
-grow_vault_integration_matrix
-    ✔ Initializes the Grow Vault with correct PDA authority and parameters (182ms)
-    ✔ Executes user deposit: transfers base assets and issues proportional shares (214ms)
-    ✔ Fails when withdrawal violates slippage tolerance (102ms)
-    ✔ Executes valid full withdrawal and verifies round-trip token balance integrity (238ms)
+Grow App Core Vault Engine
+    ✔ Initializes the Grow Vault PDA with dead-shares seed guard (410ms)
+    ✔ Executes first deposit and locks minimum liquidity to prevent inflation attack (320ms)
+    ✔ Rejects zero-amount deposit (85ms)
+    ✔ Withdraws proportionate share of assets including simulated yield (295ms)
 
   4 passing (1.8s)

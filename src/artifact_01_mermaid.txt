@@ -1,0 +1,65 @@
+flowchart TD
+    subgraph UserSpace["User / Client Layer"]
+        User["User Wallet (Signer)"]
+        UserUSDC["User USDC Token Account"]
+        UserShare["User $gUSD Token Account"]
+    end
+
+    subgraph GrowProgram["Grow Core Protocol (Anchor Program ID: grow111111111111111111111111111111111111111)"]
+        subgraph StatePDAs["Protocol State & PDAs"]
+            VaultState["Vault State PDA\n['vault', mint]\n- total_shares\n- total_assets\n- last_harvest_ts\n- admin, keeper, paused"]
+            VaultTokenPDA["Vault Token Account PDA\n['vault_tokens', vault_state]\nHolds Idle USDC Reserve"]
+            ShareMintPDA["Share Mint PDA ($gUSD)\n['share_mint', vault_state]\nFreeze/Mint Authority = VaultState"]
+        end
+
+        subgraph GuardRails["Programmatic Security & Invariant Guards"]
+            ReentrancyGuard["Reentrancy / Re-entrancy Status Check"]
+            PriceFeedGuard["Oracle / Share Price Invariant Guard"]
+            AccessControl["Signer & Keeper ACL Verification"]
+        end
+
+        subgraph InstructionHandlers["Instruction Logic"]
+            DepositHandler["deposit(amount)"]
+            WithdrawHandler["withdraw(shares)"]
+            RebalanceHandler["rebalance(target_protocol, amount)"]
+            HarvestHandler["harvest_and_compound()"]
+        end
+    end
+
+    subgraph DownstreamProtocols["Integrated Solana Yield Protocols (CPI Targets)"]
+        Kamino["Kamino Finance Lending Market"]
+        Marginfi["Marginfi Margin Pool"]
+        Sanctum["Sanctum / LST Yield Source"]
+    end
+
+    subgraph AutomationNetwork["Keeper & Monitoring Infrastructure"]
+        KeeperBot["Autonomous Off-Chain Keeper\n(Rust / TypeScript Worker)"]
+        JitoRPC["Jito-Solana MEV Protected RPC"]
+        PythOracle["Pyth Network / Switchboard Price Feeds"]
+    end
+
+    %% User interactions
+    User -->|"1. Invoke deposit(USDC)"| DepositHandler
+    UserUSDC -.->|"Transfer USDC via CPI"| VaultTokenPDA
+    DepositHandler -->|"Calculates Shares & Mints"| ShareMintPDA
+    ShareMintPDA -.->|"Mints $gUSD"| UserShare
+
+    User -->|"Invoke withdraw(shares)"| WithdrawHandler
+    UserShare -.->|"Burns $gUSD"| ShareMintPDA
+    WithdrawHandler -->|"Transfers USDC"| UserUSDC
+
+    %% Keeper Loop
+    KeeperBot -->|"Polls APY & Vault State"| VaultState
+    KeeperBot -->|"Observes Oracle Data"| PythOracle
+    KeeperBot -->|"Submits Rebalance / Compound TX via MEV Bundles"| JitoRPC
+    JitoRPC -->|"Invokes harvest_and_compound()"| HarvestHandler
+    JitoRPC -->|"Invokes rebalance()"| RebalanceHandler
+
+    %% Security & Routing Execution
+    DepositHandler --> GuardRails
+    WithdrawHandler --> GuardRails
+    RebalanceHandler --> AccessControl
+    RebalanceHandler -->|"CPI: Deposit/Borrow/Repay"| Kamino
+    RebalanceHandler -->|"CPI: Deposit/Withdraw"| Marginfi
+    HarvestHandler -->|"Claims Accrued Rewards"| Kamino
+    HarvestHandler -->|"Swaps Rewards to Base USDC"| VaultTokenPDA

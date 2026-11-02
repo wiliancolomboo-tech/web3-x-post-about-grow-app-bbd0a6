@@ -1,0 +1,23 @@
+### [00:00 - 00:20] Hook & The Broken Status Quo
+[VISUAL]: Split screen: Ethereum MetaMask gas prompt showing $32.50 gas fee for an auto-compound vs. Grow App on Solana Mobile executing in 400ms for $0.0002.
+[NARRATOR (Voiceover)]: 
+"Crypto promised self-sovereign wealth creation. But if you try micro-saving or running automated DCA on EVM, gas fees destroy your yield before you break even. 
+Today, we change that. Introducing Grow App: the high-performance, non-custodial automated savings and compounding primitive built natively for the Solana Mobile and DeFi ecosystem."
+
+### [00:20 - 00:50] Architectural Innovation: Isolated PDAs
+[VISUAL]: Architecture animation transitions into Anchor terminal displaying `initialize_user_vault` passing with deterministic seed derivation.
+[NARRATOR]: 
+"Unlike monolithic protocols where all user assets sit in a single vulnerable honeypot, Grow App introduces PDA-isolated User Growth Vaults. 
+Every user’s balance is anchored to their individual public key and vault identifier. No cross-contagion. No balance commingling. Even if an external yield pool pauses, your funds remain 100% under your non-custodial control with instant emergency escape hatches."
+
+### [00:50 - 01:25] The Engine: Autonomous Keepers & Zero-Touch DCA
+[VISUAL]: Terminal screen showing Mocha test running: `execute_compound_crank` passes in 400ms. Keeper receives micro-bounty tip automatically.
+[NARRATOR]: 
+"The engine running under the hood? A permissionless keeper network. Anyone can run a lightweight crank bot. 
+Our on-chain safety guards enforce strict cooldown timestamps and fee caps. The moment a user's DCA interval elapses, keepers trigger the atomic compound, receiving an exact micro-incentive. The user sleeps; their portfolio compounds automatically every single hour."
+
+### [01:25 - 02:00] The Pitch: Why Grow Wins 1st Place
+[VISUAL]: Live screen capture of Solana Explorer inspecting transaction hashes: Compute units consumed: 24,800. Final test report: 7 passing, 0 failing.
+[NARRATOR]: 
+"With sub-25k compute unit overhead, mathematically proven safety bounds, and a consumer-grade UX, Grow App unlocks what Web2 apps like Acorns never could: non-custodial, high-yield, transparent micro-investing for millions of Solana users. 
+Tested, audited, and ready to scale. This is Grow App."

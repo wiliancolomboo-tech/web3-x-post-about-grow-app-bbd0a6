@@ -1,0 +1,1 @@
+solana address -k target/deploy/grow_vault-keypair.json

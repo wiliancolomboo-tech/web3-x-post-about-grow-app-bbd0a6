@@ -1,0 +1,15 @@
+grow_vault integration test matrix
+    ✔ 1. Initializes Global Vault and Escrow Token Account (412ms)
+    ✔ 2. Registers Certified Micro-Inverter Device (285ms)
+    ✔ 3. Successfully ingests telemetry with valid Ed25519 precompile instruction (489ms)
+    ✔ 4. Security Guard: Rejects replay attack using already-consumed nonce (198ms)
+    ✔ 5. Security Guard: Fails when Ed25519 instruction is missing (anti-spoofing check) (142ms)
+
+  5 passing (2s)
+
+--------------------------------------------------------------------------------
+Compute Unit Consumption Report:
+• initialize_vault:     18,240 CUs
+• register_device:       7,110 CUs
+• record_generation:    14,810 CUs (including Token CPI and Ed25519 introspection)
+--------------------------------------------------------------------------------

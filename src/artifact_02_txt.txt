@@ -1,0 +1,3 @@
+> [Global State] ❌ -> Bottleneck
+> [Per-User Isolated State PDAs] ✅ -> 65,000 TPS Parallel Execution
+>

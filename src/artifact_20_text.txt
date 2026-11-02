@@ -1,0 +1,7 @@
+grow-attestor test suite
+    ✔ Initializes the Attestation Config successfully (420ms)
+    ✔ Records a valid vault attestation within acceptable solvency parameters (285ms)
+    ✔ Rejects attestation if vault fails solvency check (undercollateralized) (140ms)
+    ✔ Rejects attestation from unauthorized keeper signer (115ms)
+
+  4 passing (1.2s)

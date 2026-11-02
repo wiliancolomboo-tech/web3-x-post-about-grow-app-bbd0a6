@@ -1,0 +1,10 @@
+4/ Autonomous Cross-Program Yield Routing 🔄
+
+Grow continuously monitors spreads between @KaminoFinance, @Marginfi, and Save.
+
+When APY spreads shift:
+1. Yield rewards are harvested.
+2. Swapped via @Orca_so Whirlpool CPI.
+3. Automatically re-staked in the highest-yielding pool.
+
+100% atomic. (4/6)

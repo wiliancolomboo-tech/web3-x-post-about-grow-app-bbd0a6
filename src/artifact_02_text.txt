@@ -1,0 +1,4 @@
+2/14 ⚡ The Problem:
+On EVM, streaming $1 roundups or daily micro-savings into yield vaults burns $3-$15 in L1 gas, making micro-compounding mathematically insolvent. Even on L2s, bridging UX breaks mobile consumer funnels.
+
+Grow solves this with Solana’s sub-cent transactions and 400ms deterministic slots.

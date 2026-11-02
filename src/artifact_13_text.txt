@@ -1,0 +1,4 @@
+13/14 🔭 What’s Next:
+• Dynamic yield rebalancing across LSTs & DEX LP liquidity
+• Zero-Knowledge private balance attestations
+• Point-of-Sale merchant integration for Chapter 2 users

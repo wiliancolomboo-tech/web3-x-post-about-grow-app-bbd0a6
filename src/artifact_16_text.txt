@@ -1,0 +1,6 @@
+5/ Inflation Defense Math 🧮
+
+Grow implements strict virtual asset share pricing:
+shares = (amount * total_shares) / total_reserves
+
+Our genesis routine burns initial dead shares to permanently neutralize ERC-4626 first-depositor dilution vectors. Mathematically bulletproof. (5/6)

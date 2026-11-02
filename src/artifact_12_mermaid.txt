@@ -1,0 +1,99 @@
+flowchart TD
+    %% User & Admin Actors
+    subgraph Actors["System Actors"]
+        User["fa:fa-user User / Depositor"]
+        Keeper["fa:fa-robot Keeper Crank / Jito MEV Searcher"]
+        Admin["fa:fa-shield-halved Multi-Sig Governance Admin"]
+    end
+
+    %% Solana Runtime & Program
+    subgraph ProgramBoundary["Grow App Core Vault Program (Anchor Engine)"]
+        direction TB
+
+        %% Entry Instructions
+        subgraph Instructions["Instruction Entry Points"]
+            IX_Init["initialize_vault()"]
+            IX_Dep["deposit()"]
+            IX_Rebal["rebalance_strategy()"]
+            IX_Harvest["harvest_and_compound()"]
+            IX_Withdraw["withdraw()"]
+            IX_Pause["toggle_pause()"]
+        end
+
+        %% State PDAs
+        subgraph StatePDAs["Protocol PDAs (Program Derived Addresses)"]
+            GlobalConfig["GlobalConfig PDA\nseeds=['config']\n- admin: Pubkey\n- paused: bool\n- total_vaults: u64"]
+            VaultState["VaultState PDA\nseeds=['vault', deposit_mint]\n- deposit_mint: Pubkey\n- share_mint: Pubkey\n- total_assets: u64\n- total_shares: u64\n- fee_bps: u16"]
+            StrategyPDA["StrategyConfig PDA\nseeds=['strategy', vault, strategy_id]\n- strategy_type: u8\n- allocation_bps: u16\n- deployed_capital: u64\n- target_pool: Pubkey"]
+        end
+
+        %% Security & Guards
+        subgraph Guards["Safety & Security Guards"]
+            SignerCheck["Signer & Admin Verification"]
+            PauseGuard["Pausable Assert Check (is_active == true)"]
+            MathGuard["Safe Math Engine (Checked Math / Invariant NAV)"]
+            SlippageGuard["Min-Out Slippage Verification Engine"]
+        end
+
+        %% Token Vaults
+        subgraph TokenVaults["Associated Token Accounts (ATAs / PDAs)"]
+            UnderlyingEscrow["Vault Token Escrow (PDA Authority)\n[Asset: USDC / SOL / JitoSOL]"]
+            ShareMintAccount["$gToken Mint Account (PDA Mint Authority)"]
+        end
+    end
+
+    %% External Protocols (CPI Targets)
+    subgraph ExternalDeFi["Solana Ecosystem Yield Primitives (CPI Integration)"]
+        direction LR
+        JitoStaking["Jito / Marinade Stake Pool\n(SPL Stake Pool CPI)"]
+        KaminoLending["Kamino / MarginFi Lending Vault\n(cToken / Reserve CPI)"]
+        MeteoraPool["Meteora / Raydium CLMM Pool\n(Liquidity Position CPI)"]
+    end
+
+    %% Flow Connections: User Interactions
+    User -->|"1. deposit(amount)"| IX_Dep
+    IX_Dep --> PauseGuard
+    PauseGuard --> MathGuard
+    MathGuard -->|"Transfer Token"| UnderlyingEscrow
+    MathGuard -->|"Mint gShares"| ShareMintAccount
+    ShareMintAccount -->|"Transfer gTokens"| User
+
+    User -->|"5. withdraw(shares)"| IX_Withdraw
+    IX_Withdraw --> MathGuard
+    MathGuard -->|"Burn gShares"| ShareMintAccount
+    UnderlyingEscrow -->|"Redeem Assets"| User
+
+    %% Flow Connections: Keeper Interactions
+    Keeper -->|"2. rebalance_strategy(allocations, min_out)"| IX_Rebal
+    IX_Rebal --> SlippageGuard
+    SlippageGuard -->|"CPI Reallocate"| KaminoLending
+    SlippageGuard -->|"CPI Reallocate"| MeteoraPool
+
+    Keeper -->|"3. harvest_and_compound()"| IX_Harvest
+    IX_Harvest --> SlippageGuard
+    SlippageGuard -->|"Claim Rewards CPI"| JitoStaking
+    SlippageGuard -->|"Swap to Underlying"| MeteoraPool
+    MeteoraPool -->|"Autocompound"| UnderlyingEscrow
+
+    %% Flow Connections: Admin Governance
+    Admin -->|"4. toggle_pause() / configure()"| IX_Pause
+    IX_Pause --> SignerCheck
+    SignerCheck --> GlobalConfig
+
+    %% PDA Relationship mappings
+    GlobalConfig -.->|"Guards"| VaultState
+    VaultState -.->|"Controls"| StrategyPDA
+    VaultState -.->|"Signer Seeds (PDA)"| UnderlyingEscrow
+    VaultState -.->|"Signer Seeds (PDA)"| ShareMintAccount
+
+    classDef actor fill:#1E293B,stroke:#38BDF8,stroke-width:2px,color:#FFFFFF;
+    classDef instruction fill:#0F172A,stroke:#A855F7,stroke-width:2px,color:#FFFFFF;
+    classDef pda fill:#1E1B4B,stroke:#6366F1,stroke-width:2px,color:#FFFFFF;
+    classDef security fill:#312E81,stroke:#EC4899,stroke-width:2px,color:#FFFFFF;
+    classDef external fill:#064E3B,stroke:#10B981,stroke-width:2px,color:#FFFFFF;
+
+    class User,Keeper,Admin actor;
+    class IX_Init,IX_Dep,IX_Rebal,IX_Harvest,IX_Withdraw,IX_Pause instruction;
+    class GlobalConfig,VaultState,StrategyPDA,UnderlyingEscrow,ShareMintAccount pda;
+    class SignerCheck,PauseGuard,MathGuard,SlippageGuard security;
+    class JitoStaking,KaminoLending,MeteoraPool external;

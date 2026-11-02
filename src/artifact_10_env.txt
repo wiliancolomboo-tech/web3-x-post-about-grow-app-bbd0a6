@@ -1,0 +1,6 @@
+SOLANA_RPC_URL="https://api.devnet.solana.com"
+DRY_RUN="true"
+X_API_KEY="mock_key"
+X_API_SECRET="mock_secret"
+X_ACCESS_TOKEN="mock_token"
+X_ACCESS_SECRET="mock_token_secret"

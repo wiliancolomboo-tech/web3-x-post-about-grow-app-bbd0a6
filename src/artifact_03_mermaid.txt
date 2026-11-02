@@ -1,0 +1,57 @@
+flowchart TD
+    subgraph ClientLayer ["Client & Interface Boundary (Solana Mobile Stack / Web3)"]
+        User(["👤 User Wallet / SMS Signer"])
+        Keeper(["🤖 Permissionless Crank Bot / Keeper"])
+    end
+
+    subgraph SecurityBoundary ["Security Guards & Program Validation Engine"]
+        SignerCheck{"Signer & Nonce Validation"}
+        OwnerCheck{"Account Owner == Program ID?"}
+        CanonicalBump{"Bump Seed Canonical Check"}
+        SlippageGuard{"Oracle Price Bound & Slippage <= Max Bps"}
+    end
+
+    subgraph PDA_Layer ["Program Derived Address (PDA) State Space"]
+        MasterVault[("MasterVault PDA<br/>seeds=['grow_master_vault', mint]<br/>• total_shares: u128<br/>• total_deposited: u64<br/>• bump: u8")]
+        UserPosition[("UserPosition PDA<br/>seeds=['grow_user_position', vault, owner]<br/>• user: Pubkey<br/>• shares: u128<br/>• last_deposit_ts: i64")]
+        StrategyVault[("Strategy PDA Account<br/>seeds=['grow_strategy', vault, strategy_index]<br/>• delegate: Pubkey<br/>• active_capital: u64")]
+        VaultTokenAccount[("Vault Token Account (ATA)<br/>Owner: MasterVault PDA")]
+    end
+
+    subgraph ExternalProtocols ["External Yield Primitives (CPI Target)"]
+        SPLTokenProg["SPL Token / Token-2022 Program"]
+        MarinadeProgram["Marinade / Kamino Staking & Lending Engine"]
+        PythOracle["Pyth Network Dynamic Price Feed"]
+    end
+
+    %% User Deposit Path
+    User -->|"1. deposit(amount, min_shares_out)"| SignerCheck
+    SignerCheck --> OwnerCheck
+    OwnerCheck --> CanonicalBump
+    CanonicalBump --> SlippageGuard
+    SlippageGuard -->|"2. State Lookup"| MasterVault
+    SlippageGuard -->|"3. Calculate Shares"| UserPosition
+    
+    MasterVault -->|"4. CPI: transfer_checked()"| SPLTokenProg
+    SPLTokenProg -->|"5. Lock User Tokens"| VaultTokenAccount
+
+    %% Yield Compounding & Keeper Crank Path
+    Keeper -->|"6. harvest_and_compound()"| SignerCheck
+    SignerCheck --> StrategyVault
+    StrategyVault -->|"7. CPI: claim_yield() & stake()"| MarinadeProgram
+    MarinadeProgram -->|"8. Return Harvested Yield"| VaultTokenAccount
+    StrategyVault -->|"9. Transfer Keeper Incentive (50 bps)"| Keeper
+
+    %% State Assertions
+    VaultTokenAccount -.->|"Asset Value Query"| PythOracle
+    MasterVault -.->|"Virtual Share Updates"| UserPosition
+
+    classDef primary fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4;
+    classDef security fill:#313244,stroke:#f38ba8,stroke-width:2px,color:#cdd6f4;
+    classDef pda fill:#181825,stroke:#a6e3a1,stroke-width:2px,color:#cdd6f4;
+    classDef cpi fill:#11111b,stroke:#fab387,stroke-width:2px,color:#cdd6f4;
+
+    class User,Keeper primary;
+    class SignerCheck,OwnerCheck,CanonicalBump,SlippageGuard security;
+    class MasterVault,UserPosition,StrategyVault,VaultTokenAccount pda;
+    class SPLTokenProg,MarinadeProgram,PythOracle cpi;

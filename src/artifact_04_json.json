@@ -1,0 +1,8 @@
+{
+  "icon": "https://grow.app/assets/vault-usdc.png",
+  "title": "Deposit USDC - Grow Optimized Yield",
+  "label": "Deposit",
+  "links": {
+    "actions": [{ "label": "Deposit 50 USDC", "href": "/api/deposit?amount=50" }]
+  }
+}

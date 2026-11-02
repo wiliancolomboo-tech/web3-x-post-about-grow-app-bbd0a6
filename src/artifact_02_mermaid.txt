@@ -1,60 +1,46 @@
 flowchart TD
-    subgraph UserSpace["User / Client Layer"]
-        U["End User Wallet"]
-        K["Keeper Crank / Off-Chain Bot"]
+    subgraph ClientLayer["Client & Trigger Layer"]
+        User["User Wallet / Card App"]
+        Keeper["Autonomous Crank Keepers"]
     end
 
-    subgraph GrowProgram["Grow App Smart Contract (Program ID: GrowVa1111111111111111111111111111111111111)"]
-        direction TB
-        subgraph Accounts["Account Structures (Zero-Copy / PDAs)"]
-            VS["VaultState PDA<br/>seeds=[b'vault', base_mint]"]
-            VA["Vault Authority PDA<br/>seeds=[b'authority', vault_state]"]
-            TK["Vault Token Account (Idle Reserves)<br/>Owner: Vault Authority PDA"]
-            SHM["Share Mint (Grow LP Token)<br/>Mint Authority: Vault Authority PDA"]
-            STRAT["Strategy Registry PDA<br/>seeds=[b'strategy', vault_state, strategy_id]"]
-        end
-
-        subgraph Logic["Instruction Logic & Security Guards"]
-        DEP["deposit()<br/>• CU Check<br/>• Math Check: u128 shares<br/>• Mint Shares CPI"]
-        WITH["withdraw()<br/>• Slippage Verification<br/>• Burn Shares CPI<br/>• Token Transfer CPI"]
-        REB["rebalance()<br/>• Keeper Auth / Fee Incentive<br/>• Allocation Cap Enforcement<br/>• Flash Loan / TWAP Check"]
-        HARV["harvest_yield()<br/>• Auto-compound into idle reserves"]
-        end
+    subgraph ProgramLayer["Grow App Core Engine (Anchor Program)"]
+        ConfigState["Global Config PDA<br/>['global_config']"]
+        UserVault["User Vault PDA<br/>['grow_vault', User, Mint]"]
+        AuthCheck{"Signer & PDA Verification"}
+        Guard{"Slippage & Health Check"}
     end
 
-    subgraph ExternalDeFi["Solana DeFi Protocols (CPI Endpoints)"]
-        KAM["Kamino Finance / K-Vaults"]
-        MARG["Marginfi Lending Pool"]
-        DRIFT["Drift Spot Market"]
-        ORACLE["Pyth / Switchboard TWAP Oracles"]
+    subgraph TokenLayer["Solana Token Primitives"]
+        SPL["SPL Token / Token-2022"]
+        VaultATA["Vault Escrow ATA<br/>(Authority: User Vault PDA)"]
+    end
+
+    subgraph DeFiEcosystem["Solana Dynamic Yield Routing Layer"]
+        Kamino["Kamino Lend Reserve<br/>(kToken Yield)"]
+        Sanctum["Sanctum Infinity Pool<br/>(LST Multi-Routing)"]
+        Jito["Jito Stake Pool<br/>(MEV + Staking Yield)"]
     end
 
     %% User Interactions
-    U -->|"1. Deposit Base Asset (USDC/SOL)"| DEP
-    DEP -->|"Transfer Base Token"| TK
-    DEP -->|"Mint Grow Share Tokens"| SHM
-    U -->|"Burn Grow Shares"| WITH
-    WITH -->|"Transfer Base + Yield"| U
+    User -->|"1. deposit(amount) / round_up()"| AuthCheck
+    AuthCheck -->|"Verify Seeds & Signer"| UserVault
+    UserVault -->|"2. Transfer Tokens"| VaultATA
+    VaultATA -->|"3. Update Share Ledger"| UserVault
 
     %% Keeper Interactions
-    K -->|"Triggers Rebalance via Jito"| REB
-    K -->|"Claims Crank Bounty"| HARV
-
-    %% Program Flow & Guardrails
-    REB -->|"Read Prices & Health"| ORACLE
-    DEP -.->|"Guarded by"| VS
-    WITH -.->|"Guarded by"| VS
-    REB -.->|"Validates Limits"| STRAT
-
-    %% CPIs to External Protocols via Vault Authority PDA
-    VA ==>|"CPI: Deposit/Borrow Liquidity"| KAM
-    VA ==>|"CPI: Margin Supply"| MARG
-    VA ==>|"CPI: Deposit Collateral"| DRIFT
-
-    %% Security Annotations
-    classDef security fill:#ffefef,stroke:#ff0000,stroke-width:2px;
-    classDef pda fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
-    classDef external fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+    Keeper -->|"4. rebalance_and_compound()"| Guard
+    Guard -->|"5. Check Target Weight & Slippage"| UserVault
     
-    class VS,VA,TK,SHM,STRAT pda;
-    class KAM,MARG,DRIFT,ORACLE external;
+    %% Dynamic CPI Yield Operations
+    UserVault -->|"CPI: Deposit & Mint Receipt"| Kamino
+    UserVault -->|"CPI: Stake / Liquid Swap"| Sanctum
+    UserVault -->|"CPI: Liquid Staking Delegation"| Jito
+    
+    %% Yield Harvest & Compounding
+    Kamino -.->|"Yield Returns / kTokens"| VaultATA
+    Sanctum -.->|"LST Value Appreciation"| VaultATA
+    Jito -.->|"MEV Compounded Yield"| VaultATA
+
+    %% Keeper Reward
+    UserVault -->|"Fee Cut (BPS)"| Keeper

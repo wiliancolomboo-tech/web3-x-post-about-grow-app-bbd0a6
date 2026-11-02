@@ -1,0 +1,18 @@
+{
+  "icon": "https://grow.app/assets/vault-banner.png",
+  "title": "Grow Yield Engine",
+  "description": "Deposit USDC directly into the non-custodial automated yield vault.",
+  "label": "Deposit",
+  "links": {
+    "actions": [
+      {
+        "label": "Deposit 10 USDC",
+        "href": "/api/v1/vault/deposit?amount=10"
+      },
+      {
+        "label": "Deposit 50 USDC",
+        "href": "/api/v1/vault/deposit?amount=50"
+      }
+    ]
+  }
+}
